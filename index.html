@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>image Set Manager</title>
+
+    <link rel="stylesheet" href="./bower_components/jquery-ui/themes/base/jquery-ui.min.css">
+    <link rel="stylesheet" href="./bower_components/font-awesome/css/font-awesome.min.css">
+    <link rel="stylesheet" href="./bower_components/themify-icons/css/themify-icons.css">
+    <link rel="stylesheet" href="./bower_components/ng-dialog/css/ngDialog.min.css">
+    <link rel="stylesheet" href="./bower_components/ng-dialog/css/ngDialog-theme-default.min.css">
+    <link rel="stylesheet" href="./bower_components/bootstrap-css/css/bootstrap.min.css">
+    <!-- <link rel="stylesheet" href="style.css"> -->
+
+    <script src="./bower_components/jquery/dist/jquery.min.js"></script>
+    <script src="./bower_components/jquery-ui/jquery-ui.min.js"></script>
+    <script src="./bower_components/async/dist/async.min.js"></script>
+    <script src="./bower_components/angular/angular.min.js"></script>
+    <script src="./bower_components/ng-dialog/js/ngDialog.min.js"></script>
+    <script src="./bower_components/lodash/dist/lodash.min.js"></script>
+    <script src="./bower_components/bootstrap-css/js/bootstrap.min.js"></script>
+    <script src="./bower_components/misc-component/dist/misc-components.js"></script>
+    <script src="./dist/map-view.bundle.js"></script>
+
+</head>
+
+<body ng-app="myApp" style="font-size: 12px;">
+    <div style="width: 1000px; height: 600px; border: 1px solid black; ">
+        <image-set-manager token="'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Imh1bmduayIsIndob2FtaSI6Im1haW4tc2VydmljZSIsInJvbGUiOjIsImNvbXBhbnkiOiJFU1MiLCJpYXQiOjE1NTY5NDMxNDQsImV4cCI6MTU1NzgwNzE0NH0.uY8DVdMhkAE36hO-RFVa7ZyRqJhNhysCFybUR0Zxy2c'"></image-set-manager>
+    </div>
+    <script>
+        angular.module("myApp", ["imageSetManager"]);
+    </script>
+</body>
+
+</html>
