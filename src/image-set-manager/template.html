@@ -1,7 +1,7 @@
 <div class="main">
     <div class="main-body">
         <div class="main-body-left border-style">
-            <side-bar my-default-width="270" style="border-right: 1px solid #dedede;">
+            <side-bar my-default-width="270">
                 <wi-tree-view tree-root="treeConfig" get-label="self.getLabel" get-icon="self.getIcon"
                     get-children="self.getChildren" run-match="self.runMatch" click-fn='self.clickFunction'>
                     <div class="label-list-view">
@@ -32,10 +32,14 @@
                     <option>Trời làm cơn mưa xanh</option>
                     <option>dưới những hàng me</option>
                 </select>
-                <span class="label-button fa fa-times-circle-o" aria-hidden="true" ng-click="self.cleanMap()"></span>
-                <span class="label-button fa fa-times-circle" aria-hidden="true" ng-click="self.deleteWell()"></span>
-                <span class="label-button fa fa-times-circle-o" aria-hidden="true" ng-click="self.cleanMap()"></span>
-                <span class="label-button fa fa-times-circle" aria-hidden="true" ng-click="self.deleteWell()"></span>
+                <span class="label-button ti-close" ng-class="{'active-button':true}" aria-hidden="true"
+                    ng-click="self.deleteImageSet()"></span>
+                <span class="label-button ti-plus" ng-class="{'active-button':true}" aria-hidden="true"
+                    ng-click="self.createImageSet()"></span>
+                <span class="label-button ti-export" ng-class="{'active-button':true}" aria-hidden="true"
+                    ng-click="self.exportImageSet()"></span>
+                <span class="label-button ti-reload" ng-class="{'active-button':true}" aria-hidden="true"
+                    ng-click="self.refresh()"></span>
             </div>
             <div>
                 <table id="table-view">
