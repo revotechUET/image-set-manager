@@ -1,4 +1,16 @@
 image-set-manager {
+    .image-holder {
+        position:absolute;
+        width:200px;
+        height:200px;
+        padding:5px;
+        border:1px solid #888;
+        top:0;
+        right:0;
+        background-color: rgba(255,255,255, 0.6);
+        display: flex;
+        align-items: center;
+    }
     .main {
         display: flex;
         height: 100%;
@@ -149,28 +161,29 @@ image-set-manager {
         background-color: #dcdcdc;
     }
 
-    #table-view {
+    table {
         // font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
         border-collapse: collapse;
+        table-layout: fixed;
         width: 100%;
     }
 
-    #table-view td,
-    #table-view th {
+    td, th {
         border-bottom: 1px solid #f0f0f0;
         border-right: 1px solid #f0f0f0;
         padding-top: 10px;
         padding-bottom: 9px;
         padding-left: 14px;
+        overflow:hidden;
     }
 
 
 
-    #table-view tr:hover {
+    tr:hover {
         background-color: #f4f4f4;
     }
 
-    #table-view th {
+    th {
         padding-top: 9px;
         padding-bottom: 10px;
         text-align: left;
@@ -189,18 +202,14 @@ image-set-manager {
         border-radius: 3px;
         color: #fff;
         cursor: pointer;
+        &.disable {
+            background: #f4f4f4;
+            color: #a2a2a2;
+        }
     }
 
     .image-status-disable {
         color: #ddd;
-        cursor: pointer;
-    }
-
-    .image-active-disable {
-        padding: 3px 10px 3px 10px;
-        background: #f4f4f4;
-        border-radius: 3px;
-        color: #a2a2a2;
         cursor: pointer;
     }
 
@@ -210,7 +219,9 @@ image-set-manager {
         font-weight: normal;
         margin-left: 20px;
     }
-
+    span[ngclipboard] {
+        cursor: pointer;
+    }
 }
 
 

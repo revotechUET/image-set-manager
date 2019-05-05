@@ -2,26 +2,38 @@ var componentName = 'imageSetManager';
 module.exports.name = componentName;
 require('./style.less');
 
-var app = angular.module(componentName, ['sideBar', 'wiTreeView', 'wiDroppable', 'ngDialog', 'wiToken']);
+var app = angular.module(componentName, [
+    'sideBar', 'wiTreeView', 
+    'wiToken', 'editable', 'ngclipboard','wiDialog'
+]);
 app.component(componentName, {
     template: require('./template.html'),
     controller: imageSetManagerController,
     controllerAs: 'self',
     bindings: {
-        token: "<"
+        token: "<",
+        idProject: "<",
+        baseUrl: "<"
     },
     transclude: true
 });
 
-function imageSetManagerController($scope, $http, wiToken) {
+function imageSetManagerController($scope, $http, $timeout, $element, wiToken, wiDialog) {
     let self = this;
-    $scope.treeConfig = [];
+    self.treeConfig = [];
+    self.selectedNode = null;
     const BASE_URL = "http://dev.i2g.cloud";
-    // let Authorization = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Imh1bmduayIsIndob2FtaSI6Im1haW4tc2VydmljZSIsInJvbGUiOjIsImNvbXBhbnkiOiJFU1MiLCJpYXQiOjE1NTY5NDMxNDQsImV4cCI6MTU1NzgwNzE0NH0.uY8DVdMhkAE36hO-RFVa7ZyRqJhNhysCFybUR0Zxy2c";
 
     this.$onInit = function () {
-        wiToken.setToken(self.token);
+        self.baseUrl = self.baseUrl || BASE_URL;
+        if (self.token) 
+            wiToken.setToken(self.token);
         getTree();
+        $element.find('.image-holder').draggable({
+            start: function(event, ui) {
+                ui.helper[0].focus();
+            }
+        });
     }
     this.runMatch = function (node, criteria) {
         return node.name.includes(criteria);
@@ -42,26 +54,89 @@ function imageSetManagerController($scope, $http, wiToken) {
             return "well-16x16";
     }
     this.getChildren = function (node) {
-        if (node.idWell) {
-            return node.images;
+        if (node.idImageSet) {
+            return null;
+        }
+        else {
+            return node.imageSets;
         }
     }
-    this.clickFunction = function ($event, node) {
+    function updateNode(node) {
         if (node.idImageSet && node.idWell) {
-            console.log("CLicked on imageSet");
+            console.log("Clicked on imageSet");
         } else {
-            getImageSet(node.idWell, node, function (err, images) {
+            getImageSet(node.idWell, function (err, imageSets) {
                 console.log(node.idWell);
-                node.images = images;
-                console.log(arguments);
+                node.imageSets = imageSets;
             });
         }
+        
     }
-    self.deleteImageSet = function () {
-        console.log("delete image set");
+    this.clickFunction = function ($event, node) {
+        updateNode(node);
+        self.selectedNode = node;
     }
-    self.createImageSet = function () {
+    self.createImageSet = function() {
+        wiDialog.promptDialog({
+            title: "New Image Set",
+            inputName: "name",
+            input: 'ImgSet_'
+        }, createImageSet);
+    }
+    function createImageSet(imageSetName) {
+        if (!self.selectedNode) return;
+        $http({
+            method: 'POST',
+            url: self.baseUrl + '/project/well/image-set/new',
+            data: {
+                name: imageSetName,
+                idWell: self.selectedNode.idWell
+            },
+            headers: {
+                "Authorization": wiToken.getToken(),
+            }
+        }).then(function (response) {
+            if (response.data.code == 200) {
+                let node = self.treeConfig.find((n) => (self.selectedNode.idWell === n.idWell));
+                updateNode(node);
+            }
+            else {
+                self.createImageSet();
+            }
+        }, function (err) {
+            console.error(err);
+        });
+
         console.log('Create image set');
+    }
+    self.deleteImageSet = function() {
+        console.log("delete image set");
+        if (!self.selectedNode || !self.selectedNode.idImageSet) return;
+        wiDialog.confirmDialog("Confirmation", 
+            `Are you sure to delete image set "${self.selectedNode.name}"?`, 
+            function(yesno) {
+                if (yesno) {
+                    deleteImageSet(self.selectedNode.idImageSet);
+                }
+            });
+    }
+    function deleteImageSet(idImageSet) {
+        $http({
+            method: 'POST',
+            url: self.baseUrl + '/project/well/image-set/delete',
+            data: {
+                idImageSet:idImageSet
+            },
+            headers: {
+                "Authorization": wiToken.getToken(),
+            }
+        }).then(function (response) {
+            console.log('Success');
+            let node = self.treeConfig.find((aNode) => (self.selectedNode.idWell === aNode.idWell));
+            updateNode(node);
+        }, function (err) {
+            self.createImageSet();
+        });
     }
     self.importImages = function () {
         console.log("Import images");
@@ -71,19 +146,33 @@ function imageSetManagerController($scope, $http, wiToken) {
     }
     self.refresh = getTree;
 
+    self.rowClick = function(image) {
+        console.log("row click");
+        $timeout(() => { self.imgUrl = image.imageUrl; });
+    }
+    self.keyDown = function($event) {
+        if ($event.key === 'Escape') {
+            $timeout(() => {
+                self.imgUrl = null;
+            });
+        }
+    }
+    self.getFocus = function($event) {
+        $event.currentTarget.focus();
+    }
     function getTree() {
-        $scope.treeConfig = [];
-        getWells($scope.treeConfig, function (err, wells) {
-            $scope.treeConfig = wells;
+        self.treeConfig = [];
+        getWells(self.treeConfig, self.idProject, function (err, wells) {
+            if (!err) self.treeConfig = wells;
         });
     }
 
-    function getWells(treeConfig, cb) {
+    function getWells(treeConfig, idProject, cb) {
         $http({
             method: 'POST',
-            url: BASE_URL + '/project/well/list',
+            url: self.baseUrl + '/project/well/list',
             data: {
-                idProject: 32
+                idProject: idProject
             },
             headers: {
                 "Authorization": wiToken.getToken(),
@@ -95,10 +184,10 @@ function imageSetManagerController($scope, $http, wiToken) {
         });
     }
 
-    function getImageSet(wellId, wellNodeChildren, cb) {
+    function getImageSet(wellId, cb) {
         $http({
             method: 'POST',
-            url: BASE_URL + '/project/well/image-set/list',
+            url: self.baseUrl + '/project/well/image-set/list',
             data: {
                 idWell: wellId
             },
@@ -106,12 +195,30 @@ function imageSetManagerController($scope, $http, wiToken) {
                 "Authorization": wiToken.getToken(),
             }
         }).then(function (response) {
-            console.log(response);
-            cb(null, response.data.content, wellNodeChildren);
+            cb(null, response.data.content);
         }, function (err) {
             cb(err);
         });
     }
+    self.getImages = getImages
 
+    function getImages(imageSet) {
+        return (imageSet || {}).images;
+    }
 
+    self.addImage = function() {
+        self.selectedNode.images = self.selectedNode.images || [];
+        self.selectedNode.images.push({
+            name: 'newImage',
+            topDepth: 0,
+            bottomDepth: 100,
+            imageUrl: null,
+            idImageSet: self.selectedNode.idImageSet
+        });
+    }
+    self.imageSetup = function(image) {
+        wiDialog.imageGaleryDialog(function(imgUrl) {
+            image.imageUrl = imgUrl;
+        });
+    }
 }

@@ -6,7 +6,7 @@ module.exports = {
 	},
 	output: {
 		path: __dirname + '/dist',
-		filename: 'map-view.bundle.js'
+		filename: 'image-set-manager.js'
 	},
 	module: {
 		rules: [{
