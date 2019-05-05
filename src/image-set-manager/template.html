@@ -34,15 +34,18 @@
                     <option>ft</option>
                     <option>cm</option>
                 </select>
+                <span class="label-button ti-close" 
+                    ng-class="{'active-button':true}" aria-hidden="true"
+                    ng-click="self.deleteImageSet()"></span>
                 <span class="label-button ti-plus" 
                     ng-class="{'active-button':self.selectedNode.idImageSet}"
                     aria-hidden="true" ng-click="self.addImage()"></span>
-                <span class="label-button fa fa-times-circle" 
-                    aria-hidden="true" ng-click="self.deleteWell()"></span>
-                <span class="label-button fa fa-times-circle-o" 
-                    aria-hidden="true" ng-click="self.cleanMap()"></span>
-                <span class="label-button fa fa-times-circle" 
-                    aria-hidden="true" ng-click="self.deleteWell()"></span>
+                <span class="label-button ti-export" 
+                    ng-class="{'active-button':true}" aria-hidden="true"
+                    ng-click="self.exportImageSet()"></span>
+                <span class="label-button ti-reload" 
+                    ng-class="{'active-button':true}" aria-hidden="true"
+                    ng-click="self.refresh()"></span>
             </div>
             <div style="flex:1; overflow:auto;display:flex;position:relative;">
                 <table>
