@@ -1,16 +1,17 @@
 image-set-manager {
     .image-holder {
-        position:absolute;
-        width:200px;
-        height:200px;
-        padding:5px;
-        border:1px solid #888;
-        top:0;
-        right:0;
-        background-color: rgba(255,255,255, 0.6);
+        position: absolute;
+        width: 200px;
+        height: 200px;
+        padding: 5px;
+        border: 1px solid #888;
+        top: 0;
+        right: 0;
+        background-color: rgba(255, 255, 255, 0.6);
         display: flex;
         align-items: center;
     }
+
     .main {
         display: flex;
         height: 100%;
@@ -54,11 +55,13 @@ image-set-manager {
             display: flex;
             overflow: hidden;
             position: relative;
+
             .border-style {
                 border: 1px solid #eee;
                 border-top-right-radius: 3px;
                 border-top-left-radius: 3px;
             }
+
             .main-body-left {
                 display: flex;
                 z-index: 1;
@@ -100,23 +103,26 @@ image-set-manager {
                 position: relative;
                 flex-direction: column;
 
-                
 
-                
+
+
             }
         }
+
         .label-list-view {
             padding: 16px 15px;
             font-weight: bold;
             background: #f4f4f4;
             border: 1px solid #eee;
         }
+
         .label-button {
             float: right;
             font-size: 115%;
             color: #bbbbbb;
             margin: 2px 5px 0 15px;
             pointer-events: none;
+
             &.active-button {
                 color: #0077be;
                 pointer-events: all;
@@ -168,15 +174,28 @@ image-set-manager {
         width: 100%;
     }
 
-    td, th {
+    td,
+    th {
         border-bottom: 1px solid #f0f0f0;
         border-right: 1px solid #f0f0f0;
         padding-top: 10px;
         padding-bottom: 9px;
         padding-left: 14px;
-        overflow:hidden;
+        overflow: hidden;
     }
 
+    tr {
+        &.updated {
+            background-color: blue;
+        }
+        &.created{
+            background-color: green;
+        }
+        &.deleted {
+            background-color: red;
+            pointer-events:none;
+        }
+    }
 
 
     tr:hover {
@@ -194,24 +213,27 @@ image-set-manager {
     .image-status {
         color: #0077be;
         cursor: pointer;
+
+        &.disable {
+            color: #ddd;
+        }
     }
 
     .image-active {
         padding: 3px 10px 3px 10px;
         background: #0077be;
         border-radius: 3px;
+        margin-left: 3px;
         color: #fff;
         cursor: pointer;
+
         &.disable {
             background: #f4f4f4;
             color: #a2a2a2;
         }
     }
 
-    .image-status-disable {
-        color: #ddd;
-        cursor: pointer;
-    }
+
 
     .image-selection {
         border: none;
@@ -219,6 +241,7 @@ image-set-manager {
         font-weight: normal;
         margin-left: 20px;
     }
+
     span[ngclipboard] {
         cursor: pointer;
     }
