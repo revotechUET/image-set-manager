@@ -259,10 +259,14 @@ function imageSetManagerController($scope, $http, $timeout, $element, wiToken, w
         image.bottomDepth = newVal;
         image._updated = true;
     }
-    self.applyImageActions = function () {
+    self.applyImageActions = async function () {
+        await updateListImage();
+        // reset selectedNode
+        // /project/well/image-set/image/info
+    }
+
+    function updateListImage() {
         let images = getImages(self.selectedNode);
-        console.log(images);
-        ///=--------------------------------
         for (let idx = 0; idx < images.length; idx++) {
             let image = images[idx];
             if (image._deleted) {
@@ -271,15 +275,16 @@ function imageSetManagerController($scope, $http, $timeout, $element, wiToken, w
                 } else {
                     doDeleteImage(self.selectedNode.idImageSet, image.idImage);
                 }
+                image._deleted = false;
             } else if (image._created) {
                 doCreateImage(self.selectedNode.idImageSet, image);
+                image._created = false;
             } else if (image._updated) {
                 doUpdateImage(self.selectedNode.idImageSet, image);
+                image._updated = false;
+
             }
         }
-         ///=--------------------------------
-         //reset selectedNode
-         // /project/well/image-set/image/info
     }
 
     function doDeleteImage(idImageSet, idImage) {
