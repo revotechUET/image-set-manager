@@ -64,15 +64,14 @@ function imageSetManagerController($scope, $http, $timeout, $element, wiToken, w
 
     function updateNode(node) {
         if (node.idImageSet && node.idWell) {
-            console.log("Clicked on imageSet");
+
         } else {
             getImageSet(node.idWell, function (err, imageSets) {
-                console.log(node.idWell);
                 node.imageSets = imageSets;
             });
         }
-
     }
+
     this.clickFunction = function ($event, node) {
         updateNode(node);
         self.selectedNode = node;
@@ -107,11 +106,9 @@ function imageSetManagerController($scope, $http, $timeout, $element, wiToken, w
         }, function (err) {
             console.error(err);
         });
-
-        console.log('Create image set');
     }
+
     self.deleteImageSet = function () {
-        console.log("delete image set");
         if (!self.selectedNode || !self.selectedNode.idImageSet) return;
         wiDialog.confirmDialog("Confirmation",
             `Are you sure to delete image set "${self.selectedNode.name}"?`,
@@ -133,7 +130,6 @@ function imageSetManagerController($scope, $http, $timeout, $element, wiToken, w
                 "Authorization": wiToken.getToken(),
             }
         }).then(function (response) {
-            console.log('Success');
             let node = self.treeConfig.find((aNode) => (self.selectedNode.idWell === aNode.idWell));
             updateNode(node);
         }, function (err) {
@@ -205,6 +201,7 @@ function imageSetManagerController($scope, $http, $timeout, $element, wiToken, w
             cb(err);
         });
     }
+
     self.getImages = getImages
 
     function getImages(imageSet) {
@@ -259,35 +256,75 @@ function imageSetManagerController($scope, $http, $timeout, $element, wiToken, w
         image.bottomDepth = newVal;
         image._updated = true;
     }
-    self.applyImageActions = async function () {
-        await updateListImage();
-        // reset selectedNode
-        // /project/well/image-set/image/info
-        self.getImages(self.selectedNode)
+    self.applyImageActions = function () {
+        updateListImage();
     }
 
-    function updateListImage() {
-        let images = getImages(self.selectedNode);
+    async function updateListImage() {
+        let images = self.getImages(self.selectedNode);
+        
         for (let idx = 0; idx < images.length; idx++) {
             let image = images[idx];
             if (image._deleted) {
                 if (image._created) {
                     images.splice(idx, 1);
                 } else {
-                    doDeleteImage(self.selectedNode.idImageSet, image.idImage);
+                    let response = await doDeleteImagePromise(self.selectedNode.idImageSet, image.idImage);
+                    console.log('Done delete', response);
                 }
-                image._deleted = false;
             } else if (image._created) {
-                doCreateImage(self.selectedNode.idImageSet, image);
-                image._created = false;
+                let response = await doCreateImagePromise(self.selectedNode.idImageSet, image);
+                console.log('Done create', response);
             } else if (image._updated) {
-                doUpdateImage(self.selectedNode.idImageSet, image);
-                image._updated = false;
-
+                let response = await doUpdateImagePromise(self.selectedNode.idImageSet, image);
+                console.log('Done update', response);
             }
         }
-    }
+        console.log("DONE ALL");
+        let response = await $http({
+            method: 'POST',
+            url: self.baseUrl + '/project/well/image-set/info',
+            data: {
+                idImageSet: self.selectedNode.idImageSet
+            },
+            headers: {
+                "Authorization": wiToken.getToken(),
+            }
+        });
+        $timeout(() => {
+            self.selectedNode.images = response.data.content.images; 
+        });
+        // for (let idx = 0; idx < images.length; idx++) {
+        //     let image = images[idx];
+        //     if (image._deleted) {
+        //         if (image._created) {
+        //             images.splice(idx, 1);
+        //         } else {
+        //             doDeleteImage(self.selectedNode.idImageSet, image.idImage);
+        //         }
+        //         // image._deleted = false;
+        //     } else if (image._created) {
+        //         doCreateImage(self.selectedNode.idImageSet, image);
+        //         // image._created = false;
+        //     } else if (image._updated) {
+        //         doUpdateImage(self.selectedNode.idImageSet, image);
+        //         // image._updated = false;
 
+        //     }
+        // }
+    }
+    function doDeleteImagePromise(idImageSet, idImage) {
+        return $http({
+            method: 'POST',
+            url: self.baseUrl + '/project/well/image-set/image/delete',
+            data: {
+                idImage: idImage
+            },
+            headers: {
+                "Authorization": wiToken.getToken(),
+            }
+        });
+    }
     function doDeleteImage(idImageSet, idImage) {
         $http({
             method: 'POST',
@@ -305,6 +342,17 @@ function imageSetManagerController($scope, $http, $timeout, $element, wiToken, w
         });
     }
 
+    function doCreateImagePromise(idImageSet, image) {
+        image.idImageSet = idImageSet;
+        return $http({
+            method: 'POST',
+            url: self.baseUrl + '/project/well/image-set/image/new',
+            data: image,
+            headers: {
+                "Authorization": wiToken.getToken(),
+            }
+        });
+    }
     function doCreateImage(idImageSet, image) {
         image.idImageSet = idImageSet;
         $http({
@@ -321,6 +369,16 @@ function imageSetManagerController($scope, $http, $timeout, $element, wiToken, w
         });
     }
 
+    function doUpdateImagePromise(idImageSet, image) {
+        return $http({
+            method: 'POST',
+            url: self.baseUrl + '/project/well/image-set/image/edit',
+            data: image,
+            headers: {
+                "Authorization": wiToken.getToken(),
+            }
+        });
+    }
     function doUpdateImage(idImageSet, image) {
         $http({
             method: 'POST',
