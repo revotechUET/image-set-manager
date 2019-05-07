@@ -263,6 +263,7 @@ function imageSetManagerController($scope, $http, $timeout, $element, wiToken, w
         await updateListImage();
         // reset selectedNode
         // /project/well/image-set/image/info
+        self.getImages(self.selectedNode)
     }
 
     function updateListImage() {

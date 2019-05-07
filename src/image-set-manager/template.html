@@ -6,25 +6,19 @@
                     get-children="self.getChildren" run-match="self.runMatch" click-fn='self.clickFunction'>
                     <div class="label-list-view">
                         <span>WELL LIST</span>
-                        <span class="label-button ti-close"
-                            ng-class="{'active-button':self.selectedNode.idImageSet}" aria-hidden="true"
-                            ng-click="self.deleteImageSet()"></span>
-                        <span class="label-button ti-plus"
-                            ng-class="{'active-button':self.selectedNode.idWell}" aria-hidden="true"
-                            ng-click="self.createImageSet()"></span>
-                        <span class="label-button ti-export"
-                            ng-class="{'active-button':self.selectedNode.idImageSet}" aria-hidden="true"
-                            ng-click="self.exportImageSet()"></span>
-                        <span class="label-button ti-import"
-                            ng-class="{'active-button':true}" aria-hidden="true"
+                        <span class="label-button ti-close" ng-class="{'active-button':self.selectedNode.idImageSet}"
+                            aria-hidden="true" ng-click="self.deleteImageSet()"></span>
+                        <span class="label-button ti-plus" ng-class="{'active-button':self.selectedNode.idWell}"
+                            aria-hidden="true" ng-click="self.createImageSet()"></span>
+                        <span class="label-button ti-export" ng-class="{'active-button':self.selectedNode.idImageSet}"
+                            aria-hidden="true" ng-click="self.exportImageSet()"></span>
+                        <span class="label-button ti-import" ng-class="{'active-button':true}" aria-hidden="true"
                             ng-click="self.importImages()"></span>
-                        <span class="label-button ti-reload" 
-                            ng-class="{'active-button':true}" aria-hidden="true"
+                        <span class="label-button ti-reload" ng-class="{'active-button':true}" aria-hidden="true"
                             ng-click="self.refresh()"></span>
                     </div>
                 </wi-tree-view>
             </side-bar>
-
         </div>
         <div class="main-body-center border-style">
             <div class="label-list-view">
@@ -34,17 +28,13 @@
                     <option>ft</option>
                     <option>cm</option>
                 </select>
-                <span class="label-button ti-close" 
-                    ng-class="{'active-button':true}" aria-hidden="true"
+                <span class="label-button ti-close" ng-class="{'active-button':true}" aria-hidden="true"
                     ng-click="self.deleteImage()"></span>
-                <span class="label-button ti-plus" 
-                    ng-class="{'active-button':self.selectedNode.idImageSet}"
+                <span class="label-button ti-plus" ng-class="{'active-button':self.selectedNode.idImageSet}"
                     aria-hidden="true" ng-click="self.addImage()"></span>
-                <span class="label-button ti-save" 
-                    ng-class="{'active-button':true}" aria-hidden="true"
+                <span class="label-button ti-save" ng-class="{'active-button':true}" aria-hidden="true"
                     ng-click="self.applyImageActions()"></span>
-                <span class="label-button ti-reload" 
-                    ng-class="{'active-button':true}" aria-hidden="true"
+                <span class="label-button ti-reload" ng-class="{'active-button':true}" aria-hidden="true"
                     ng-click="self.refresh()"></span>
             </div>
             <div style="flex:1; overflow:auto;display:flex;position:relative;">
@@ -56,26 +46,36 @@
                         <th>Bottom</th>
                         <th>Image</th>
                     </tr>
-                    <tr ng-repeat="image in self.getImages(self.selectedNode)" 
+                    <tr ng-repeat="image in self.getImages(self.selectedNode)"
                         ng-class="{'deleted': image._deleted, 'updated': image._updated, 'created': image._created}"
                         ng-click="self.rowClick(image);self.deselectAll();image._selected = !image._selected;">
-                        <td><span ng-class="{'disable': !image._selected}"class="image-status fa fa-check"></span></td>
-                        <td><editable params="image" item-value="image.name" set-value="self.updateImageName" enabled="true"></editable></td>
-                        <td><editable params="image" item-value="image.topDepth" set-value="self.updateImageTopDepth" enabled="true"></editable></td>
-                        <td><editable params="image" item-value="image.bottomDepth" set-value="self.updateImageBottomDepth" enabled="true"></editable></td>
+                        <td><span ng-class="{'disable': !image._selected}" class="image-status fa fa-check"></span></td>
+                        <td>
+                            <editable params="image" item-value="image.name" set-value="self.updateImageName"
+                                enabled="true"></editable>
+                        </td>
+                        <td>
+                            <editable params="image" item-value="image.topDepth" set-value="self.updateImageTopDepth"
+                                enabled="true"></editable>
+                        </td>
+                        <td>
+                            <editable params="image" item-value="image.bottomDepth"
+                                set-value="self.updateImageBottomDepth" enabled="true"></editable>
+                        </td>
                         <td>
                             <span class="image-active" ng-click="self.imageSetup(image)">
-                                <i class="ti-settings"></i>
-                            </span>
-                            <span class="image-active"
-                                  ng-class="{'disable': !image.imageUrl}" 
-                                  ngclipboard data-clipboard-text="{{image.imageUrl}}">
-                                <i class="ti-clipboard"></i>
+                                <!-- <i class="ti-settings"></i> -->
+                                Setting</span>
+                            <span class="image-active" style="margin-left: 9px;" ng-class="{'disable': !image.imageUrl}"
+                                ngclipboard data-clipboard-text="{{image.imageUrl}}">
+                                <!-- <i class="ti-eye"></i> -->
+                                Preview
                             </span>
                         </td>
                     </tr>
                 </table>
-                <div ng-show="self.imgUrl" class="image-holder" ng-click="self.getFocus($event)" ng-keydown="self.keyDown($event);" tabindex="0">
+                <div ng-show="self.imgUrl" class="image-holder" ng-click="self.getFocus($event)"
+                    ng-keydown="self.keyDown($event);" tabindex="0">
                     <img class="img-responsive" ng-src="{{self.imgUrl?(self.baseUrl + self.imgUrl):undefined}}">
                 </div>
             </div>

@@ -185,21 +185,22 @@ image-set-manager {
     }
 
     tr {
+        border-right: 4px solid #fff;
         &.updated {
-            background-color: blue;
+            background-color: #c2eaff70;
         }
         &.created{
-            background-color: green;
+            background-color: #abeaab29;
         }
         &.deleted {
-            background-color: red;
+            background-color: #f4f4f4;
             pointer-events:none;
+            color: #d8d3d3;
         }
     }
 
-
     tr:hover {
-        background-color: #f4f4f4;
+        border-right: 4px solid #0077be;
     }
 
     th {
@@ -223,7 +224,7 @@ image-set-manager {
         padding: 3px 10px 3px 10px;
         background: #0077be;
         border-radius: 3px;
-        margin-left: 3px;
+        // margin-left: 3px;
         color: #fff;
         cursor: pointer;
 
