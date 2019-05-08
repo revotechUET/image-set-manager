@@ -150,6 +150,12 @@ function imageSetManagerController($scope, $http, $timeout, $element, wiToken, w
             self.imgUrl = image.imageUrl;
         });
     }
+    self.previewImagecheck = function() {
+        self.hasPreview = self.previewImageCheckValue;
+        if(!self.previewImageCheckValue){
+            self.imgUrl = null;
+        }
+    };
     self.keyDown = function ($event) {
         if ($event.key === 'Escape') {
             $timeout(() => {
@@ -157,6 +163,7 @@ function imageSetManagerController($scope, $http, $timeout, $element, wiToken, w
             });
         }
     }
+
     self.getFocus = function ($event) {
         $event.currentTarget.focus();
     }
