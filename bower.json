@@ -1,12 +1,11 @@
 {
-  "name": "base-map",
+  "name": "image-set-manager",
   "description": "",
   "main": "",
   "authors": [
     "Hung <hungnk1996@gmail.com>"
   ],
   "license": "MIT",
-  "homepage": "https://github.com/tunghoang/base-map",
   "ignore": [
     "**/.*",
     "node_modules",
