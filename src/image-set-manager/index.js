@@ -25,6 +25,7 @@ function imageSetManagerController($scope, $http, $timeout, $element, wiToken, w
     const BASE_URL = "http://dev.i2g.cloud";
 
     this.$onInit = function () {
+        self.hasPreview = true;
         self.baseUrl = self.baseUrl || BASE_URL;
         if (self.token)
             wiToken.setToken(self.token);
@@ -150,14 +151,6 @@ function imageSetManagerController($scope, $http, $timeout, $element, wiToken, w
             self.imgUrl = image.imageUrl;
         });
     }
-    self.previewImagecheck = function () {
-
-        if (self.previewImageCheckValue) {
-            self.hasPreview = self.previewImageCheckValue;
-        } else if (!self.previewImageCheckValue) {
-            self.hasPreview = self.previewImageCheckValue;
-        } 
-    };
     self.keyDown = function ($event) {
         if ($event.key === 'Escape') {
             $timeout(() => {

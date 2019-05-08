@@ -29,8 +29,7 @@
                     <option>cm</option>
                 </select>
                 <span style="margin-left: 20px;"> Preview Images
-                    <input style="margin-left: 10px;" type="checkbox" ng-model="self.previewImageCheckValue"
-                        ng-click="self.previewImagecheck()" checked>
+                    <input style="margin-left: 10px;" type="checkbox" ng-model="self.hasPreview">
                 </span>
                 <span class="label-button ti-trash" ng-class="{'active-button':true}" aria-hidden="true"
                     ng-click="self.deleteImage()"></span>
@@ -52,7 +51,7 @@
                     </tr>
                     <tr ng-repeat="image in self.getImages(self.selectedNode)"
                         ng-class="{'deleted': image._deleted, 'updated': image._updated, 'created': image._created}"
-                        ng-click="self.rowClick(image);self.deselectAll();image._selected = !image._selected;">
+                        ng-click="self.deselectAll();image._selected = !image._selected;">
                         <td><span ng-class="{'disable': !image._selected}" class="image-status fa fa-check"></span></td>
                         <td>
                             <editable params="image" item-value="image.name" set-value="self.updateImageName"
@@ -71,7 +70,7 @@
                                 <!-- <i class="ti-settings"></i> -->
                                 Setting</span>
                             <span class="image-active" style="margin-left: 9px;" ng-class="{'disable': !image.imageUrl}"
-                                ngclipboard data-clipboard-text="{{image.imageUrl}}">
+                                ngclipboard data-clipboard-text="{{image.imageUrl}}" ng-click="self.rowClick(image);">
                                 <!-- <i class="ti-eye"></i> -->
                                 Preview
                             </span>
