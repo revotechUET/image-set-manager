@@ -21,7 +21,7 @@
             </side-bar>
         </div>
         <div class="main-body-center border-style">
-            <div class="label-list-view">
+            <div class="label-list-view" style="height: 49px; padding: 14px 15px 16px 15px;">
                 <span>Unit</span>
                 <select class="image-selection" title="Select unit">
                     <option selected>m</option>
@@ -37,7 +37,7 @@
                 <span class="label-button ti-reload" ng-class="{'active-button':true}" aria-hidden="true"
                     ng-click="self.refresh()"></span>
             </div>
-            <div style="flex:1; overflow:auto;display:flex;position:relative;">
+            <div style="flex:1; overflow:auto;display:flex;position:relative; background-color: #fff;">
                 <table>
                     <tr ng-if="self.selectedNode.idImageSet">
                         <th style="width: 42px;"></th>
@@ -75,7 +75,7 @@
                     </tr>
                 </table>
                 <div ng-show="self.imgUrl" class="image-holder" ng-click="self.getFocus($event)"
-                    ng-keydown="self.keyDown($event);" tabindex="0">
+                    ng-keydown="self.keyDown($event);" tabindex="0" style="position:absolute;">
                     <img class="img-responsive" ng-src="{{self.imgUrl?(self.baseUrl + self.imgUrl):undefined}}">
                 </div>
             </div>
