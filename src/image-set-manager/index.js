@@ -150,10 +150,11 @@ function imageSetManagerController($scope, $http, $timeout, $element, wiToken, w
             self.imgUrl = image.imageUrl;
         });
     }
-    self.previewImagecheck = function() {
-        self.hasPreview = self.previewImageCheckValue;
-        if(!self.previewImageCheckValue){
-            self.imgUrl = null;
+    self.previewImagecheck = function () {
+        if (self.previewImageCheckValue) {
+            self.hasPreview = self.previewImageCheckValue;
+        } else if(!self.previewImageCheckValue) {
+            self.hasPreview = self.previewImageCheckValue;
         }
     };
     self.keyDown = function ($event) {
@@ -269,7 +270,7 @@ function imageSetManagerController($scope, $http, $timeout, $element, wiToken, w
 
     async function updateListImage() {
         let images = self.getImages(self.selectedNode);
-        
+
         for (let idx = 0; idx < images.length; idx++) {
             let image = images[idx];
             if (image._deleted) {
@@ -299,7 +300,7 @@ function imageSetManagerController($scope, $http, $timeout, $element, wiToken, w
             }
         });
         $timeout(() => {
-            self.selectedNode.images = response.data.content.images; 
+            self.selectedNode.images = response.data.content.images;
         });
         // for (let idx = 0; idx < images.length; idx++) {
         //     let image = images[idx];
@@ -320,6 +321,7 @@ function imageSetManagerController($scope, $http, $timeout, $element, wiToken, w
         //     }
         // }
     }
+
     function doDeleteImagePromise(idImageSet, idImage) {
         return $http({
             method: 'POST',
@@ -332,6 +334,7 @@ function imageSetManagerController($scope, $http, $timeout, $element, wiToken, w
             }
         });
     }
+
     function doDeleteImage(idImageSet, idImage) {
         $http({
             method: 'POST',
@@ -360,6 +363,7 @@ function imageSetManagerController($scope, $http, $timeout, $element, wiToken, w
             }
         });
     }
+
     function doCreateImage(idImageSet, image) {
         image.idImageSet = idImageSet;
         $http({
@@ -386,6 +390,7 @@ function imageSetManagerController($scope, $http, $timeout, $element, wiToken, w
             }
         });
     }
+
     function doUpdateImage(idImageSet, image) {
         $http({
             method: 'POST',
