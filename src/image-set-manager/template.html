@@ -21,7 +21,7 @@
             </side-bar>
         </div>
         <div class="main-body-center border-style">
-            <div class="label-list-view" style="height: 49px; padding: 14px 15px 16px 15px;">
+            <div class="label-list-view" style="padding: 15px;">
                 <span>Unit</span>
                 <select class="image-selection" title="Select unit">
                     <option selected>m</option>
@@ -32,23 +32,23 @@
                     <input style="margin-left: 10px;" type="checkbox" ng-model="self.previewImageCheckValue"
                         ng-click="self.previewImagecheck()" checked>
                 </span>
-                <span class="label-button ti-close" ng-class="{'active-button':true}" aria-hidden="true"
+                <span class="label-button ti-trash" ng-class="{'active-button':true}" aria-hidden="true"
                     ng-click="self.deleteImage()"></span>
                 <span class="label-button ti-plus" ng-class="{'active-button':self.selectedNode.idImageSet}"
                     aria-hidden="true" ng-click="self.addImage()"></span>
                 <span class="label-button ti-save" ng-class="{'active-button':true}" aria-hidden="true"
                     ng-click="self.applyImageActions()"></span>
-                <span class="label-button ti-reload" ng-class="{'active-button':true}" aria-hidden="true"
-                    ng-click="self.refresh()"></span>
+                <!-- <span class="label-button ti-reload" ng-class="{'active-button':true}" aria-hidden="true"
+                    ng-click="self.refresh()"></span> -->
             </div>
             <div style="flex:1; overflow:auto;display:flex;position:relative; background-color: #fff;">
-                <table>
+                <table style="width: 100%;">
                     <tr ng-if="self.selectedNode.idImageSet">
                         <th style="width: 42px;"></th>
-                        <th>Name</th>
-                        <th>Top</th>
-                        <th>Bottom</th>
-                        <th>Image</th>
+                        <th style="width: 40%;">Name</th>
+                        <th style="width: 15%;">Top</th>
+                        <th style="width: 15%;">Bottom</th>
+                        <th style="width: 40%;">Image</th>
                     </tr>
                     <tr ng-repeat="image in self.getImages(self.selectedNode)"
                         ng-class="{'deleted': image._deleted, 'updated': image._updated, 'created': image._created}"

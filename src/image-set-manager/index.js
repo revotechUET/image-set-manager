@@ -145,7 +145,7 @@ function imageSetManagerController($scope, $http, $timeout, $element, wiToken, w
     self.refresh = getTree;
 
     self.rowClick = function (image) {
-        console.log("row click");
+        // console.log("row click");
         $timeout(() => {
             self.imgUrl = image.imageUrl;
         });
