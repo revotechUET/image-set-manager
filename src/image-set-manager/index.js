@@ -151,11 +151,12 @@ function imageSetManagerController($scope, $http, $timeout, $element, wiToken, w
         });
     }
     self.previewImagecheck = function () {
+
         if (self.previewImageCheckValue) {
             self.hasPreview = self.previewImageCheckValue;
-        } else if(!self.previewImageCheckValue) {
+        } else if (!self.previewImageCheckValue) {
             self.hasPreview = self.previewImageCheckValue;
-        }
+        } 
     };
     self.keyDown = function ($event) {
         if ($event.key === 'Escape') {
