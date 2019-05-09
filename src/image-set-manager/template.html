@@ -51,8 +51,11 @@
                     </tr>
                     <tr ng-repeat="image in self.getImages(self.selectedNode)"
                         ng-class="{'deleted': image._deleted, 'updated': image._updated, 'created': image._created}"
-                        ng-click="self.deselectAll();image._selected = !image._selected;">
-                        <td><span ng-class="{'disable': !image._selected}" class="image-status fa fa-check"></span></td>
+                        ng-click="self.rowClick($event, image);">
+                        <td>
+                            <span ng-class="{'disable': !image._selected}" class="image-status fa fa-check">
+                            </span>
+                        </td>
                         <td>
                             <editable params="image" item-value="image.name" set-value="self.updateImageName"
                                 enabled="true"></editable>
@@ -66,14 +69,14 @@
                                 set-value="self.updateImageBottomDepth" enabled="true"></editable>
                         </td>
                         <td>
-                            <span class="image-active" ng-click="self.imageSetup(image)">
-                                <!-- <i class="ti-settings"></i> -->
-                                Setting</span>
-                            <span class="image-active" style="margin-left: 9px;" ng-class="{'disable': !image.imageUrl}"
-                                ngclipboard data-clipboard-text="{{image.imageUrl}}" ng-click="self.rowClick(image);">
-                                <!-- <i class="ti-eye"></i> -->
-                                Preview
-                            </span>
+                            <button class="btn btn-default" ng-click="self.imageSetup(image)"><span class="fa fa-cloud-upload">
+                            </span></button>
+                            <button class="btn btn-default" style="margin-left: 9px;" ng-disabled="!image.imageUrl" ng-class="{'disable': !image.imageUrl}" ng-click="self.preview(image);"><span class="fa fa-eye">
+                            </span></button>
+                            <button class="btn btn-default" style="margin-left: 9px;" ng-disabled="!image.imageUrl" ng-class="{'disable': !image.imageUrl}"
+                                ngclipboard data-clipboard-text="{{image.imageUrl}}">
+                                Copy URL
+                            </button>
                         </td>
                     </tr>
                 </table>

@@ -4,7 +4,7 @@ require('./style.less');
 
 var app = angular.module(componentName, [
     'sideBar', 'wiTreeView',
-    'wiToken', 'editable', 'ngclipboard', 'wiDialog'
+    'wiApi', 'editable', 'ngclipboard', 'wiDialog'
 ]);
 app.component(componentName, {
     template: require('./template.html'),
@@ -18,7 +18,7 @@ app.component(componentName, {
     transclude: true
 });
 
-function imageSetManagerController($scope, $http, $timeout, $element, wiToken, wiDialog) {
+function imageSetManagerController($scope, $timeout, $element, wiToken, wiApi, wiDialog) {
     let self = this;
     self.treeConfig = [];
     self.selectedNode = null;
@@ -67,9 +67,15 @@ function imageSetManagerController($scope, $http, $timeout, $element, wiToken, w
         if (node.idImageSet && node.idWell) {
 
         } else {
-            getImageSet(node.idWell, function (err, imageSets) {
+            wiApi.getImageSetsPromise(node.idWell)
+                .then(imageSets => {
+                    let imgs = imageSets.sort((img1, img2) => (img1.orderNum - img2.orderNum));
+                    $timeout(() => node.imageSets = imgs)
+                })
+                .catch(err => console.error(err));
+            /*getImageSet(node.idWell, function (err, imageSets) {
                 node.imageSets = imageSets;
-            });
+            });*/
         }
     }
 
@@ -85,28 +91,17 @@ function imageSetManagerController($scope, $http, $timeout, $element, wiToken, w
         }, createImageSet);
     }
 
-    function createImageSet(imageSetName) {
+    async function createImageSet(imageSetName) {
         if (!self.selectedNode) return;
-        $http({
-            method: 'POST',
-            url: self.baseUrl + '/project/well/image-set/new',
-            data: {
-                name: imageSetName,
-                idWell: self.selectedNode.idWell
-            },
-            headers: {
-                "Authorization": wiToken.getToken(),
-            }
-        }).then(function (response) {
-            if (response.data.code == 200) {
-                let node = self.treeConfig.find((n) => (self.selectedNode.idWell === n.idWell));
-                updateNode(node);
-            } else {
-                self.createImageSet();
-            }
-        }, function (err) {
+        try {
+            await wiApi.createImageSetPromise(self.selectedNode.idWell, name);
+            let node = self.treeConfig.find((n) => (self.selectedNode.idWell === n.idWell));
+            updateNode(node);
+        }
+        catch(err) {
             console.error(err);
-        });
+            self.createImageSet();
+        }
     }
 
     self.deleteImageSet = function () {
@@ -115,28 +110,16 @@ function imageSetManagerController($scope, $http, $timeout, $element, wiToken, w
             `Are you sure to delete image set "${self.selectedNode.name}"?`,
             function (yesno) {
                 if (yesno) {
-                    deleteImageSet(self.selectedNode.idImageSet);
+                    try {
+                        wiApi.deleteImageSetPromise(self.selectedNode.idImageSet);
+                    }
+                    catch(err) {
+                        console.error(err);
+                    }
                 }
             });
     }
 
-    function deleteImageSet(idImageSet) {
-        $http({
-            method: 'POST',
-            url: self.baseUrl + '/project/well/image-set/delete',
-            data: {
-                idImageSet: idImageSet
-            },
-            headers: {
-                "Authorization": wiToken.getToken(),
-            }
-        }).then(function (response) {
-            let node = self.treeConfig.find((aNode) => (self.selectedNode.idWell === aNode.idWell));
-            updateNode(node);
-        }, function (err) {
-            self.createImageSet();
-        });
-    }
     self.importImages = function () {
         console.log("Import images");
     }
@@ -145,7 +128,36 @@ function imageSetManagerController($scope, $http, $timeout, $element, wiToken, w
     }
     self.refresh = getTree;
 
-    self.rowClick = function (image) {
+    self.rowClick = function($event, image) {
+        if (!$event.ctrlKey && !$event.metaKey && !$event.shiftKey) {
+            self.deselectAll();
+            image._selected = !image._selected;
+            return;
+        }
+        if ($event.ctrlKey || $event.metaKey) {
+            image._selected = !image._selected;
+            return;
+        }
+        if ($event.shiftKey) {
+            let selectedImages = self.selectedNode.images.filter(img => img._selected);
+            if (image.orderNum < selectedImages[0].orderNum) {
+                self.selectedNode.images.forEach(img => {
+                    if ((img.orderNum - image.orderNum)*(img.orderNum - selectedImages[0].orderNum) < 0) {
+                        img._selected = true;
+                    }
+                });
+            }
+            else if (image.orderNum > selectedImages[selectedImages.length-1].orderNum) {
+                self.selectedNode.images.forEach(img => {
+                    if ((img.orderNum - image.orderNum)*(img.orderNum - selectedImages[selectedImages.length-1].orderNum) < 0) {
+                        img._selected = true;
+                    }
+                });
+            }
+        }
+        image._selected = !image._selected;
+    }
+    self.preview = function (image) {
         // console.log("row click");
         $timeout(() => {
             self.imgUrl = image.imageUrl;
@@ -164,50 +176,18 @@ function imageSetManagerController($scope, $http, $timeout, $element, wiToken, w
     }
 
     function getTree() {
-        self.treeConfig = [];
-        getWells(self.treeConfig, self.idProject, function (err, wells) {
-            if (!err) self.treeConfig = wells;
-        });
-    }
-
-    function getWells(treeConfig, idProject, cb) {
-        $http({
-            method: 'POST',
-            url: self.baseUrl + '/project/well/list',
-            data: {
-                idProject: idProject
-            },
-            headers: {
-                "Authorization": wiToken.getToken(),
-            }
-        }).then(function (response) {
-            cb(null, response.data.content, treeConfig);
-        }, function (err) {
-            cb(err);
-        });
-    }
-
-    function getImageSet(wellId, cb) {
-        $http({
-            method: 'POST',
-            url: self.baseUrl + '/project/well/image-set/list',
-            data: {
-                idWell: wellId
-            },
-            headers: {
-                "Authorization": wiToken.getToken(),
-            }
-        }).then(function (response) {
-            cb(null, response.data.content);
-        }, function (err) {
-            cb(err);
-        });
+        wiApi.getWellsPromise(self.idProject)
+            .then(wells => $timeout(() => self.treeConfig = wells))
+            .catch(err => console.error(err));
     }
 
     self.getImages = getImages
 
     function getImages(imageSet) {
-        return (imageSet || {}).images;
+        try {
+            return (imageSet || {}).images.sort((img1, img2) => (img1.orderNum - img2.orderNum));
+        }
+        catch(e) {return []}
     }
     self.deselectAll = function () {
         deselectAll(self.selectedNode);
@@ -222,41 +202,96 @@ function imageSetManagerController($scope, $http, $timeout, $element, wiToken, w
     }
 
     self.addImage = function () {
+        let well = self.treeConfig.find((aNode) => (self.selectedNode.idWell === aNode.idWell));
+        let topDepth = getTopDepth(well);
+        let bottomDepth = getBottomDepth(well);
         self.selectedNode.images = self.selectedNode.images || [];
-        self.selectedNode.images.push({
-            name: 'newImage',
-            topDepth: 0,
-            bottomDepth: 100,
-            imageUrl: null,
-            idImageSet: self.selectedNode.idImageSet,
-            _created: true
-        });
+        let selectedIdx = self.selectedNode.images.findIndex(img => img._selected);
+        if (selectedIdx < 0) {
+            let oNum = 0;
+            if (self.selectedNode.images.length > 0) {
+                oNum = self.selectedNode.images[self.selectedNode.images.length-1].orderNum;
+            }
+            self.selectedNode.images.push({
+                name: 'newImage',
+                topDepth: topDepth,
+                bottomDepth: Math.min(bottomDepth, topDepth + 100),
+                imageUrl: null,
+                idImageSet: self.selectedNode.idImageSet,
+                orderNum: oNum,
+                _created: true
+            });
+        }
+        else {
+            let oNum = self.selectedNode.images[selectedIdx].orderNum + 1;
+            for( let j = selectedIdx + 1; j < self.selectedNode.images.length; j++ ) {
+                self.selectedNode.images[j].orderNum = oNum + j - selectedIdx;
+                self.selectedNode.images[j]._updated = true;
+            }
+            self.selectedNode.images.splice(selectedIdx, 0, {
+                name: 'newImage',
+                topDepth: topDepth,
+                bottomDepth: Math.min(bottomDepth, topDepth + 100),
+                imageUrl: null,
+                idImageSet: self.selectedNode.idImageSet,
+                orderNum: oNum,
+                _created: true
+            })
+        }
     }
 
     self.deleteImage = function () {
         let images = getImages(self.selectedNode);
         if (!images) return;
-        let image = images.find((img) => (img._selected));
-        image._deleted = true;
+        images.filter((img) => (img._selected)).forEach(img => img._deleted = true);
+        //image._deleted = true;
     }
 
     self.imageSetup = function (image) {
-        wiDialog.imageGaleryDialog(function (imgUrl) {
-            image.imageUrl = imgUrl;
-            image._updated = true;
+        wiDialog.imageUploadDialog(function (imgUrl) {
+            if (image.imageUrl != imgUrl && imgUrl) {
+                image.imageUrl = imgUrl;
+                image._updated = true;
+            }
         });
     }
     self.updateImageName = function (image, newVal) {
-        image.name = newVal;
-        image._updated = true;
+        if (image.name != newVal) {
+            image.name = newVal;
+            image._updated = true;
+        }
     }
     self.updateImageTopDepth = function (image, newVal) {
-        image.topDepth = newVal;
-        image._updated = true;
+        newVal = parseFloat(newVal)
+        if (newVal >= image.bottomDepth) {
+            return console.log("Error again");
+        }
+        let well = self.treeConfig.find((aNode) => (self.selectedNode.idWell === aNode.idWell));
+        let topDepth = getTopDepth(well);
+        let bottomDepth = getBottomDepth(well);
+        if ((newVal - topDepth) * (newVal - bottomDepth) < 0) {
+            image.topDepth = newVal;
+            image._updated = true;
+        }
+        else {
+            console.log("Error");
+        }
     }
     self.updateImageBottomDepth = function (image, newVal) {
-        image.bottomDepth = newVal;
-        image._updated = true;
+        newVal = parseFloat(newVal)
+        if (newVal <= image.topDepth) {
+            return console.log("Error again");
+        }
+        let well = self.treeConfig.find((aNode) => (self.selectedNode.idWell === aNode.idWell));
+        let topDepth = getTopDepth(well);
+        let bottomDepth = getBottomDepth(well);
+        if ((newVal - topDepth) * (newVal - bottomDepth) < 0) {
+            image.bottomDepth = newVal;
+            image._updated = true;
+        }
+        else {
+            console.log("Error");
+        }
     }
     self.applyImageActions = function () {
         updateListImage();
@@ -271,132 +306,47 @@ function imageSetManagerController($scope, $http, $timeout, $element, wiToken, w
                 if (image._created) {
                     images.splice(idx, 1);
                 } else {
-                    let response = await doDeleteImagePromise(self.selectedNode.idImageSet, image.idImage);
-                    console.log('Done delete', response);
+                    try {
+                        await wiApi.deleteImagePromise(image.idImage);
+                    }
+                    catch(err) {
+                        console.error(err);
+                    }
                 }
             } else if (image._created) {
-                let response = await doCreateImagePromise(self.selectedNode.idImageSet, image);
-                console.log('Done create', response);
+                image.idImageSet = self.selectedNode.idImageSet;
+                try {
+                    await wiApi.createImagePromise(image);
+                }
+                catch(err) {
+                    console.error(err);
+                }
             } else if (image._updated) {
-                let response = await doUpdateImagePromise(self.selectedNode.idImageSet, image);
-                console.log('Done update', response);
+                try {
+                    await wiApi.updateImagePromise(image);
+                }
+                catch(err) {
+                    console.error(err);
+                }
             }
         }
-        console.log("DONE ALL");
-        let response = await $http({
-            method: 'POST',
-            url: self.baseUrl + '/project/well/image-set/info',
-            data: {
-                idImageSet: self.selectedNode.idImageSet
-            },
-            headers: {
-                "Authorization": wiToken.getToken(),
-            }
-        });
-        $timeout(() => {
-            self.selectedNode.images = response.data.content.images;
-        });
-        // for (let idx = 0; idx < images.length; idx++) {
-        //     let image = images[idx];
-        //     if (image._deleted) {
-        //         if (image._created) {
-        //             images.splice(idx, 1);
-        //         } else {
-        //             doDeleteImage(self.selectedNode.idImageSet, image.idImage);
-        //         }
-        //         // image._deleted = false;
-        //     } else if (image._created) {
-        //         doCreateImage(self.selectedNode.idImageSet, image);
-        //         // image._created = false;
-        //     } else if (image._updated) {
-        //         doUpdateImage(self.selectedNode.idImageSet, image);
-        //         // image._updated = false;
-
-        //     }
-        // }
-    }
-
-    function doDeleteImagePromise(idImageSet, idImage) {
-        return $http({
-            method: 'POST',
-            url: self.baseUrl + '/project/well/image-set/image/delete',
-            data: {
-                idImage: idImage
-            },
-            headers: {
-                "Authorization": wiToken.getToken(),
-            }
-        });
-    }
-
-    function doDeleteImage(idImageSet, idImage) {
-        $http({
-            method: 'POST',
-            url: self.baseUrl + '/project/well/image-set/image/delete',
-            data: {
-                idImage: idImage
-            },
-            headers: {
-                "Authorization": wiToken.getToken(),
-            }
-        }).then(function (response) {
-            console.log(response.data.content);
-        }, function (err) {
+        try {
+            let imageSet = await wiApi.getImageSetPromise(self.selectedNode.idImageSet);
+            $timeout(() => {
+                self.selectedNode.images = imageSet.images;
+            });
+        }
+        catch(err) {
             console.error(err);
-        });
+        }
     }
 
-    function doCreateImagePromise(idImageSet, image) {
-        image.idImageSet = idImageSet;
-        return $http({
-            method: 'POST',
-            url: self.baseUrl + '/project/well/image-set/image/new',
-            data: image,
-            headers: {
-                "Authorization": wiToken.getToken(),
-            }
-        });
+    function getTopDepth(well) {
+        let startHdr = well.well_headers.find((wh) => (wh.header === 'STRT'));
+        return wiApi.convertUnit(parseFloat(startHdr.value), startHdr.unit, 'm');
     }
-
-    function doCreateImage(idImageSet, image) {
-        image.idImageSet = idImageSet;
-        $http({
-            method: 'POST',
-            url: self.baseUrl + '/project/well/image-set/image/new',
-            data: image,
-            headers: {
-                "Authorization": wiToken.getToken(),
-            }
-        }).then(function (response) {
-            console.log(response.data.content);
-        }, function (err) {
-            console.error(err);
-        });
-    }
-
-    function doUpdateImagePromise(idImageSet, image) {
-        return $http({
-            method: 'POST',
-            url: self.baseUrl + '/project/well/image-set/image/edit',
-            data: image,
-            headers: {
-                "Authorization": wiToken.getToken(),
-            }
-        });
-    }
-
-    function doUpdateImage(idImageSet, image) {
-        $http({
-            method: 'POST',
-            url: self.baseUrl + '/project/well/image-set/image/edit',
-            data: image,
-            headers: {
-                "Authorization": wiToken.getToken(),
-            }
-        }).then(function (response) {
-            console.log(response.data.content);
-        }, function (err) {
-            console.error(err);
-        });
+    function getBottomDepth(well) {
+        let stopHdr = well.well_headers.find((wh) => (wh.header === 'STOP'));
+        return wiApi.convertUnit(parseFloat(stopHdr.value), stopHdr.unit, 'm');
     }
 }
