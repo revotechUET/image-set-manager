@@ -94,7 +94,7 @@ function imageSetManagerController($scope, $timeout, $element, wiToken, wiApi, w
     async function createImageSet(imageSetName) {
         if (!self.selectedNode) return;
         try {
-            await wiApi.createImageSetPromise(self.selectedNode.idWell, name);
+            await wiApi.createImageSetPromise(self.selectedNode.idWell, imageSetName);
             let node = self.treeConfig.find((n) => (self.selectedNode.idWell === n.idWell));
             updateNode(node);
         }
@@ -108,10 +108,12 @@ function imageSetManagerController($scope, $timeout, $element, wiToken, wiApi, w
         if (!self.selectedNode || !self.selectedNode.idImageSet) return;
         wiDialog.confirmDialog("Confirmation",
             `Are you sure to delete image set "${self.selectedNode.name}"?`,
-            function (yesno) {
+            async function (yesno) {
                 if (yesno) {
                     try {
-                        wiApi.deleteImageSetPromise(self.selectedNode.idImageSet);
+                        await wiApi.deleteImageSetPromise(self.selectedNode.idImageSet);
+                        let node = self.treeConfig.find((n) => (self.selectedNode.idWell === n.idWell));
+                        updateNode(node);
                     }
                     catch(err) {
                         console.error(err);
@@ -343,10 +345,10 @@ function imageSetManagerController($scope, $timeout, $element, wiToken, wiApi, w
 
     function getTopDepth(well) {
         let startHdr = well.well_headers.find((wh) => (wh.header === 'STRT'));
-        return wiApi.convertUnit(parseFloat(startHdr.value), startHdr.unit, 'm');
+        return wiApi.convertUnit(parseFloat((startHdr||{}).value || 0), startHdr.unit, 'm');
     }
     function getBottomDepth(well) {
         let stopHdr = well.well_headers.find((wh) => (wh.header === 'STOP'));
-        return wiApi.convertUnit(parseFloat(stopHdr.value), stopHdr.unit, 'm');
+        return wiApi.convertUnit(parseFloat((stopHdr || {}).value || 0), stopHdr.unit, 'm');
     }
 }
