@@ -23,10 +23,8 @@
         <div class="main-body-center border-style">
             <div class="label-list-view" style="padding: 15px;">
                 <span>Unit</span>
-                <select class="image-selection" title="Select unit">
-                    <option selected>m</option>
-                    <option>ft</option>
-                    <option>cm</option>
+                <select class="image-selection" title="Select unit" ng-model="self.unit"
+                    ng-options="option.name for option in self.unitOptions track by option.id">
                 </select>
                 <span style="margin-left: 20px;"> Preview Images
                     <input style="margin-left: 10px;" type="checkbox" ng-model="self.hasPreview">
@@ -40,7 +38,11 @@
                 <!-- <span class="label-button ti-reload" ng-class="{'active-button':true}" aria-hidden="true"
                     ng-click="self.refresh()"></span> -->
             </div>
-            <div style="flex:1; overflow:auto;display:flex;position:relative; background-color: #fff;">
+            <div ng-if="self.selectedNode" style="text-align:right;padding:5px;">
+                <span>Top:{{self.getTopDepth();}}</span><span>&nbsp;-&nbsp;</span>
+                <span>Bottom:{{self.getBottomDepth();}}</span>
+            </div>
+            <div style="flex:1; overflow:auto;display:flex;position:relative; background-color: #fff;border-top:1px solid #eee;">
                 <table style="width: 100%;">
                     <tr ng-if="self.selectedNode.idImageSet">
                         <th style="width: 42px;"></th>
@@ -57,16 +59,19 @@
                             </span>
                         </td>
                         <td>
-                            <editable params="image" item-value="image.name" set-value="self.updateImageName"
+                            <editable params="image" item-value="image.name" 
+                                set-value="self.updateImageName"
                                 enabled="true"></editable>
                         </td>
                         <td>
-                            <editable params="image" item-value="image.topDepth" set-value="self.updateImageTopDepth"
+                            <editable params="image" item-value="self.getImageTopDepth" 
+                                set-value="self.updateImageTopDepth"
                                 enabled="true"></editable>
                         </td>
                         <td>
-                            <editable params="image" item-value="image.bottomDepth"
-                                set-value="self.updateImageBottomDepth" enabled="true"></editable>
+                            <editable params="image" item-value="self.getImageBottomDepth"
+                                set-value="self.updateImageBottomDepth" 
+                                enabled="true"></editable>
                         </td>
                         <td>
                             <button class="btn btn-default" ng-click="self.imageSetup(image)"><span class="fa fa-cloud-upload">

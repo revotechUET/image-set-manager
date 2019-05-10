@@ -21,6 +21,8 @@ app.component(componentName, {
 function imageSetManagerController($scope, $timeout, $element, wiToken, wiApi, wiDialog) {
     let self = this;
     self.treeConfig = [];
+    self.unitOptions = [{id:1,name:'m'},{id:2,name:'ft'}];
+    //self.unit = self.unitOptions[0];
     self.selectedNode = null;
     const BASE_URL = "http://dev.i2g.cloud";
 
@@ -65,8 +67,9 @@ function imageSetManagerController($scope, $timeout, $element, wiToken, wiApi, w
 
     function updateNode(node) {
         if (node.idImageSet && node.idWell) {
-
+            
         } else {
+            self.unit = self.unitOptions.find(uOpt => (uOpt.name === getUnit(node).trim().toLowerCase()));
             wiApi.getImageSetsPromise(node.idWell)
                 .then(imageSets => {
                     let imgs = imageSets.sort((img1, img2) => (img1.orderNum - img2.orderNum));
@@ -203,42 +206,49 @@ function imageSetManagerController($scope, $timeout, $element, wiToken, wiApi, w
         });
     }
 
-    self.addImage = function () {
+    self.addImage = async function () {
         let well = self.treeConfig.find((aNode) => (self.selectedNode.idWell === aNode.idWell));
         let topDepth = getTopDepth(well);
         let bottomDepth = getBottomDepth(well);
         self.selectedNode.images = self.selectedNode.images || [];
         let selectedIdx = self.selectedNode.images.findIndex(img => img._selected);
+        let imageObj = {
+            name: 'newImage',
+            topDepth: topDepth,
+            bottomDepth: Math.min(bottomDepth, topDepth + 100),
+            imageUrl: null,
+            idImageSet: self.selectedNode.idImageSet
+        }
+        let oNum = 0;
         if (selectedIdx < 0) {
-            let oNum = 0;
             if (self.selectedNode.images.length > 0) {
                 oNum = self.selectedNode.images[self.selectedNode.images.length-1].orderNum;
             }
-            self.selectedNode.images.push({
-                name: 'newImage',
-                topDepth: topDepth,
-                bottomDepth: Math.min(bottomDepth, topDepth + 100),
-                imageUrl: null,
-                idImageSet: self.selectedNode.idImageSet,
-                orderNum: oNum,
-                _created: true
-            });
         }
         else {
-            let oNum = self.selectedNode.images[selectedIdx].orderNum + 1;
+            oNum = self.selectedNode.images[selectedIdx].orderNum + 1;
             for( let j = selectedIdx + 1; j < self.selectedNode.images.length; j++ ) {
                 self.selectedNode.images[j].orderNum = oNum + j - selectedIdx;
                 self.selectedNode.images[j]._updated = true;
             }
-            self.selectedNode.images.splice(selectedIdx, 0, {
-                name: 'newImage',
-                topDepth: topDepth,
-                bottomDepth: Math.min(bottomDepth, topDepth + 100),
-                imageUrl: null,
-                idImageSet: self.selectedNode.idImageSet,
-                orderNum: oNum,
-                _created: true
-            })
+        }
+        imageObj.orderNum = oNum;
+        try {
+            let image = await wiApi.createImagePromise(imageObj);
+            image._created = true;
+            if (selectedIdx < 0) {
+                $timeout(() => {
+                    self.selectedNode.images.push(image);
+                });
+            }
+            else {
+                $timeout(() => {
+                    self.selectedNode.images.splice(selectedIdx, 0, image);
+                });
+            }
+        }
+        catch(err) {
+            console.error(err);
         }
     }
 
@@ -250,7 +260,7 @@ function imageSetManagerController($scope, $timeout, $element, wiToken, wiApi, w
     }
 
     self.imageSetup = function (image) {
-        wiDialog.imageUploadDialog(function (imgUrl) {
+        wiDialog.imageUploadDialog(image.idImage, function (imgUrl) {
             if (image.imageUrl != imgUrl && imgUrl) {
                 image.imageUrl = imgUrl;
                 image._updated = true;
@@ -262,6 +272,9 @@ function imageSetManagerController($scope, $timeout, $element, wiToken, wiApi, w
             image.name = newVal;
             image._updated = true;
         }
+    }
+    self.getImageTopDepth = function(image) {
+        return wiApi.convertUnit(image.topDepth, 'm', self.unit.name);
     }
     self.updateImageTopDepth = function (image, newVal) {
         newVal = parseFloat(newVal)
@@ -278,6 +291,9 @@ function imageSetManagerController($scope, $timeout, $element, wiToken, wiApi, w
         else {
             console.log("Error");
         }
+    }
+    self.getImageBottomDepth = function(image) {
+        return wiApi.convertUnit(image.bottomDepth, 'm', self.unit.name);
     }
     self.updateImageBottomDepth = function (image, newVal) {
         newVal = parseFloat(newVal)
@@ -309,6 +325,7 @@ function imageSetManagerController($scope, $timeout, $element, wiToken, wiApi, w
                     images.splice(idx, 1);
                 } else {
                     try {
+                        if (image.imageUrl) await wiApi.deleteImageFilePromise(image.imageUrl);
                         await wiApi.deleteImagePromise(image.idImage);
                     }
                     catch(err) {
@@ -316,19 +333,38 @@ function imageSetManagerController($scope, $timeout, $element, wiToken, wiApi, w
                     }
                 }
             } else if (image._created) {
-                image.idImageSet = self.selectedNode.idImageSet;
-                try {
-                    await wiApi.createImagePromise(image);
+                if (image.imageUrl) {
+                    try {
+                        await wiApi.updateImagePromise(image);
+                    }
+                    catch(err) {
+                        console.error(err);
+                    }
                 }
-                catch(err) {
-                    console.error(err);
+                else {
+                    try {
+                        await wiApi.deleteImagePromise(image.idImage);
+                    }
+                    catch(err) {
+                        console.error(err);
+                    }
                 }
             } else if (image._updated) {
-                try {
-                    await wiApi.updateImagePromise(image);
+                if (image.imageUrl) {
+                    try {
+                        await wiApi.updateImagePromise(image);
+                    }
+                    catch(err) {
+                        console.error(err);
+                    }
                 }
-                catch(err) {
-                    console.error(err);
+                else {
+                    try {
+                        await wiApi.deleteImagePromise(image.idImage);
+                    }
+                    catch(err) {
+                        console.error(err);
+                    }
                 }
             }
         }
@@ -343,12 +379,33 @@ function imageSetManagerController($scope, $timeout, $element, wiToken, wiApi, w
         }
     }
 
-    function getTopDepth(well) {
+    function getTopDepth(well, unit = 'm') {
         let startHdr = well.well_headers.find((wh) => (wh.header === 'STRT'));
-        return wiApi.convertUnit(parseFloat((startHdr||{}).value || 0), startHdr.unit, 'm');
+        return wiApi.convertUnit(parseFloat((startHdr||{}).value || 0), startHdr.unit, unit);
     }
-    function getBottomDepth(well) {
+    function getBottomDepth(well, unit = 'm') {
         let stopHdr = well.well_headers.find((wh) => (wh.header === 'STOP'));
-        return wiApi.convertUnit(parseFloat((stopHdr || {}).value || 0), stopHdr.unit, 'm');
+        return wiApi.convertUnit(parseFloat((stopHdr || {}).value || 0), stopHdr.unit, unit);
+    }
+    function getUnit(well) {
+        return well.unit;
+    }
+    self.getTopDepth = function() {
+        try {
+            let well = self.treeConfig.find((aNode) => (self.selectedNode.idWell === aNode.idWell));
+            return getTopDepth(well, self.unit.name);
+        }
+        catch(err) {
+            return "";
+        }
+    }
+    self.getBottomDepth = function() {
+        try {
+            let well = self.treeConfig.find((aNode) => (self.selectedNode.idWell === aNode.idWell));
+            return getBottomDepth(well, self.unit.name);
+        }
+        catch(err) {
+            return "";
+        }
     }
 }
