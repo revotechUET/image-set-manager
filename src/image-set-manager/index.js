@@ -67,7 +67,8 @@ function imageSetManagerController($scope, $timeout, $element, wiToken, wiApi, w
 
     function updateNode(node) {
         if (node.idImageSet && node.idWell) {
-            
+            let well = self.treeConfig.find(w => w.idWell === node.idWell);
+            self.unit = self.unitOptions.find(uOpt => (uOpt.name === getUnit(well).trim().toLowerCase()));
         } else {
             self.unit = self.unitOptions.find(uOpt => (uOpt.name === getUnit(node).trim().toLowerCase()));
             wiApi.getImageSetsPromise(node.idWell)
@@ -127,6 +128,7 @@ function imageSetManagerController($scope, $timeout, $element, wiToken, wiApi, w
 
     self.importImages = function () {
         console.log("Import images");
+        wiDialog.importImagesDialog(self.idProject, "ImpImgSet", function() {});
     }
     self.exportImageSet = function () {
         console.log("Export image set");
@@ -208,8 +210,8 @@ function imageSetManagerController($scope, $timeout, $element, wiToken, wiApi, w
 
     self.addImage = async function () {
         let well = self.treeConfig.find((aNode) => (self.selectedNode.idWell === aNode.idWell));
-        let topDepth = getTopDepth(well);
-        let bottomDepth = getBottomDepth(well);
+        let topDepth = wApi.getWellTopDepth(well);
+        let bottomDepth = wiApi.getWellBottomDepth(well);
         self.selectedNode.images = self.selectedNode.images || [];
         let selectedIdx = self.selectedNode.images.findIndex(img => img._selected);
         let imageObj = {
@@ -222,7 +224,10 @@ function imageSetManagerController($scope, $timeout, $element, wiToken, wiApi, w
         let oNum = 0;
         if (selectedIdx < 0) {
             if (self.selectedNode.images.length > 0) {
-                oNum = self.selectedNode.images[self.selectedNode.images.length-1].orderNum;
+                let previousImage = self.selectedNode.images[self.selectedNode.images.length-1];
+                oNum = previousImage.orderNum;
+                imageObj.topDepth = previousImage.bottomDepth;
+                imageObj.bottomDepth = Math.min(bottomDepth, imageObj.topDepth + 100);
             }
         }
         else {
@@ -231,6 +236,9 @@ function imageSetManagerController($scope, $timeout, $element, wiToken, wiApi, w
                 self.selectedNode.images[j].orderNum = oNum + j - selectedIdx;
                 self.selectedNode.images[j]._updated = true;
             }
+            let previousImage = self.selectedNode.images[selectedIdx];
+            imageObj.topDepth = previousImage.bottomDepth;
+            imageObj.bottomDepth = Math.min(bottomDepth, imageObj.topDepth + 100);
         }
         imageObj.orderNum = oNum;
         try {
@@ -274,16 +282,16 @@ function imageSetManagerController($scope, $timeout, $element, wiToken, wiApi, w
         }
     }
     self.getImageTopDepth = function(image) {
-        return wiApi.convertUnit(image.topDepth, 'm', self.unit.name);
+        return wiApi.bestNumberFormat(wiApi.convertUnit(image.topDepth, 'm', self.unit.name), 2);
     }
     self.updateImageTopDepth = function (image, newVal) {
-        newVal = parseFloat(newVal)
+        newVal = wiApi.convertUnit(parseFloat(newVal),self.unit.name,'m');
         if (newVal >= image.bottomDepth) {
             return console.log("Error again");
         }
         let well = self.treeConfig.find((aNode) => (self.selectedNode.idWell === aNode.idWell));
-        let topDepth = getTopDepth(well);
-        let bottomDepth = getBottomDepth(well);
+        let topDepth = wiApi.getWellTopDepth(well);
+        let bottomDepth = wiApi.getWellBottomDepth(well);
         if ((newVal - topDepth) * (newVal - bottomDepth) < 0) {
             image.topDepth = newVal;
             image._updated = true;
@@ -293,16 +301,16 @@ function imageSetManagerController($scope, $timeout, $element, wiToken, wiApi, w
         }
     }
     self.getImageBottomDepth = function(image) {
-        return wiApi.convertUnit(image.bottomDepth, 'm', self.unit.name);
+        return wiApi.bestNumberFormat(wiApi.convertUnit(image.bottomDepth, 'm', self.unit.name), 2);
     }
     self.updateImageBottomDepth = function (image, newVal) {
-        newVal = parseFloat(newVal)
+        newVal = wiApi.convertUnit(parseFloat(newVal), self.unit.name, 'm');
         if (newVal <= image.topDepth) {
             return console.log("Error again");
         }
         let well = self.treeConfig.find((aNode) => (self.selectedNode.idWell === aNode.idWell));
-        let topDepth = getTopDepth(well);
-        let bottomDepth = getBottomDepth(well);
+        let topDepth = wiApi.getWellTopDepth(well);
+        let bottomDepth = wiApi.getWellBottomDepth(well);
         if ((newVal - topDepth) * (newVal - bottomDepth) < 0) {
             image.bottomDepth = newVal;
             image._updated = true;
@@ -379,21 +387,13 @@ function imageSetManagerController($scope, $timeout, $element, wiToken, wiApi, w
         }
     }
 
-    function getTopDepth(well, unit = 'm') {
-        let startHdr = well.well_headers.find((wh) => (wh.header === 'STRT'));
-        return wiApi.convertUnit(parseFloat((startHdr||{}).value || 0), startHdr.unit, unit);
-    }
-    function getBottomDepth(well, unit = 'm') {
-        let stopHdr = well.well_headers.find((wh) => (wh.header === 'STOP'));
-        return wiApi.convertUnit(parseFloat((stopHdr || {}).value || 0), stopHdr.unit, unit);
-    }
     function getUnit(well) {
         return well.unit;
     }
     self.getTopDepth = function() {
         try {
             let well = self.treeConfig.find((aNode) => (self.selectedNode.idWell === aNode.idWell));
-            return getTopDepth(well, self.unit.name);
+            return wiApi.bestNumberFormat(wiApi.getWellTopDepth(well, self.unit.name));
         }
         catch(err) {
             return "";
@@ -402,7 +402,7 @@ function imageSetManagerController($scope, $timeout, $element, wiToken, wiApi, w
     self.getBottomDepth = function() {
         try {
             let well = self.treeConfig.find((aNode) => (self.selectedNode.idWell === aNode.idWell));
-            return getBottomDepth(well, self.unit.name);
+            return wiApi.bestNumberFormat(wiApi.getWellBottomDepth(well, self.unit.name));
         }
         catch(err) {
             return "";

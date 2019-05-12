@@ -39,8 +39,8 @@
                     ng-click="self.refresh()"></span> -->
             </div>
             <div ng-if="self.selectedNode" style="text-align:right;padding:5px;">
-                <span>Top:{{self.getTopDepth();}}</span><span>&nbsp;-&nbsp;</span>
-                <span>Bottom:{{self.getBottomDepth();}}</span>
+                <span style="font-weight:bold;">Top:&nbsp;</span><span>{{self.getTopDepth();}}</span><span>&nbsp;&nbsp;-&nbsp;&nbsp;</span>
+                <span style="font-weight:bold;">Bottom:&nbsp;</span><span>{{self.getBottomDepth();}}</span>
             </div>
             <div style="flex:1; overflow:auto;display:flex;position:relative; background-color: #fff;border-top:1px solid #eee;">
                 <table style="width: 100%;">
