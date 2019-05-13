@@ -1,15 +1,20 @@
 image-set-manager {
+   
+    
     .image-holder {
         position: absolute;
         width: 200px;
         height: 200px;
         padding: 5px;
-        border: 1px solid #888;
+        border: 2px solid #3b99fc;
         top: 0;
+        // background: #fff;
         right: 0;
-        background-color: rgba(255, 255, 255, 0.6);
+        cursor: grab;
+        border-radius: 10px;
         display: flex;
         align-items: center;
+        outline: none;
     }
     button.disable {
         color: #aaa;
@@ -112,9 +117,34 @@ image-set-manager {
             padding: 16px 15px;
             font-weight: bold;
             background: #f4f4f4;
-            border: 1px solid #eee;
+            // border: 1px solid #eee;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-weight: 400;
         }
-
+        .label-info-image{
+            background: #fff;
+            min-width: 115px;
+            display: flex;
+            align-items: center;
+            border-radius: 3px;
+            padding: 5px 10px;
+            margin-right: 15px;
+            justify-content: space-between;
+        }
+        
+        .button-td {
+            cursor: pointer;
+            background: #f4f4f4;
+            padding: 3px 10px;
+            border-radius: 2px;
+            border: 1px solid #e8e8e8;
+        }
+        .button-td:hover{
+            background: #87c1ff;
+            color: #fff;
+        }
         .label-button {
             float: right;
             font-size: 115%;
@@ -182,6 +212,7 @@ image-set-manager {
         padding-bottom: 9px;
         padding-left: 14px;
         overflow: hidden;
+        
     }
 
     tr {

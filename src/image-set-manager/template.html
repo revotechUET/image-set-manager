@@ -4,7 +4,7 @@
             <side-bar my-default-width="270">
                 <wi-tree-view tree-root="self.treeConfig" get-label="self.getLabel" get-icon="self.getIcon"
                     get-children="self.getChildren" run-match="self.runMatch" click-fn='self.clickFunction'>
-                    <div class="label-list-view">
+                    <div class="label-list-view" style="border-bottom: 1px solid #f0f0f0;">
                         <span>WELL LIST</span>
                         <span class="label-button ti-close" ng-class="{'active-button':self.selectedNode.idImageSet}"
                             aria-hidden="true" ng-click="self.deleteImageSet()"></span>
@@ -21,28 +21,45 @@
             </side-bar>
         </div>
         <div class="main-body-center border-style">
-            <div class="label-list-view" style="padding: 15px;">
-                <span>Unit</span>
-                <select class="image-selection" title="Select unit" ng-model="self.unit"
-                    ng-options="option.name for option in self.unitOptions track by option.id">
-                </select>
-                <span style="margin-left: 20px;"> Preview Images
-                    <input style="margin-left: 10px;" type="checkbox" ng-model="self.hasPreview">
-                </span>
-                <span class="label-button ti-trash" ng-class="{'active-button':true}" aria-hidden="true"
-                    ng-click="self.deleteImage()"></span>
-                <span class="label-button ti-plus" ng-class="{'active-button':self.selectedNode.idImageSet}"
-                    aria-hidden="true" ng-click="self.addImage()"></span>
-                <span class="label-button ti-save" ng-class="{'active-button':true}" aria-hidden="true"
-                    ng-click="self.applyImageActions()"></span>
-                <!-- <span class="label-button ti-reload" ng-class="{'active-button':true}" aria-hidden="true"
+            <div class="label-list-view" style="padding: 11px 15px;">
+                <div style="display: flex;">
+                    <div class="label-info-image">
+                        <span>Unit</span>
+                        <select class="image-selection" title="Select unit" ng-model="self.unit"
+                            ng-options="option.name for option in self.unitOptions track by option.id">
+                        </select>
+                    </div>
+                    <div class="label-info-image">
+                        <span> Preview Images
+                            <input style="margin: 0 0 0 10px;" type="checkbox" ng-model="self.hasPreview">
+                        </span>
+                    </div>
+                    <div class="label-info-image">
+                        <span>Top: &nbsp;{{self.getTopDepth();}}</span>
+                    </div>
+                    <div class="label-info-image">
+                        <span>Bottom: &nbsp;{{self.getBottomDepth();}}</span>
+                    </div>
+                </div>
+
+                <div>
+                    <span class="label-button ti-trash" ng-class="{'active-button':true}" aria-hidden="true"
+                        ng-click="self.deleteImage()"></span>
+                    <span class="label-button ti-plus" ng-class="{'active-button':self.selectedNode.idImageSet}"
+                        aria-hidden="true" ng-click="self.addImage()"></span>
+                    <span class="label-button ti-save" ng-class="{'active-button':true}" aria-hidden="true"
+                        ng-click="self.applyImageActions()"></span>
+                    <!-- <span class="label-button ti-reload" ng-class="{'active-button':true}" aria-hidden="true"
                     ng-click="self.refresh()"></span> -->
+                </div>
+
             </div>
-            <div ng-if="self.selectedNode" style="text-align:right;padding:5px;">
+            <!-- <div ng-if="self.selectedNode" style="text-align:right;padding:5px;">
                 <span style="font-weight:bold;">Top:&nbsp;</span><span>{{self.getTopDepth();}}</span><span>&nbsp;&nbsp;-&nbsp;&nbsp;</span>
                 <span style="font-weight:bold;">Bottom:&nbsp;</span><span>{{self.getBottomDepth();}}</span>
-            </div>
-            <div style="flex:1; overflow:auto;display:flex;position:relative; background-color: #fff;border-top:1px solid #eee;">
+            </div> -->
+            <div
+                style="flex:1; overflow:auto;display:flex;position:relative; background-color: #fff;border-top:1px solid #eee;">
                 <table style="width: 100%;">
                     <tr ng-if="self.selectedNode.idImageSet">
                         <th style="width: 42px;"></th>
@@ -59,35 +76,31 @@
                             </span>
                         </td>
                         <td>
-                            <editable params="image" item-value="image.name" 
-                                set-value="self.updateImageName"
+                            <editable params="image" item-value="image.name" set-value="self.updateImageName"
                                 enabled="true"></editable>
                         </td>
                         <td>
-                            <editable params="image" item-value="self.getImageTopDepth" 
-                                set-value="self.updateImageTopDepth"
-                                enabled="true"></editable>
+                            <editable params="image" item-value="self.getImageTopDepth"
+                                set-value="self.updateImageTopDepth" enabled="true"></editable>
                         </td>
                         <td>
                             <editable params="image" item-value="self.getImageBottomDepth"
-                                set-value="self.updateImageBottomDepth" 
-                                enabled="true"></editable>
+                                set-value="self.updateImageBottomDepth" enabled="true"></editable>
                         </td>
                         <td>
-                            <button class="btn btn-default" ng-click="self.imageSetup(image)"><span class="fa fa-cloud-upload">
-                            </span></button>
-                            <button class="btn btn-default" style="margin-left: 9px;" ng-disabled="!image.imageUrl" ng-class="{'disable': !image.imageUrl}" ng-click="self.preview(image);"><span class="fa fa-eye">
-                            </span></button>
-                            <button class="btn btn-default" style="margin-left: 9px;" ng-disabled="!image.imageUrl" ng-class="{'disable': !image.imageUrl}"
-                                ngclipboard data-clipboard-text="{{image.imageUrl}}">
-                                Copy URL
-                            </button>
+                            <span ng-click="self.imageSetup(image)" class="button-td">Upload</span>
+                            <span ng-click="self.preview(image)" class="button-td" ng-disabled="!image.imageUrl"
+                            ng-class="{'disable': !image.imageUrl}" style="margin-left: 10px;">Preview</span>
+                            <span style="margin-left: 10px;" ng-disabled="!image.imageUrl" class="button-td"
+                            ng-class="{'disable': !image.imageUrl}" ngclipboard
+                            data-clipboard-text="http://dev.i2g.cloud{{image.imageUrl}}">
+                            Copy URL</span>
                         </td>
                     </tr>
                 </table>
                 <div ng-show="self.hasPreview && self.imgUrl" class="image-holder" ng-click="self.getFocus($event)"
                     ng-keydown="self.keyDown($event);" tabindex="0" style="position:absolute;">
-                    <img class="img-responsive" ng-src="{{self.imgUrl?(self.baseUrl + self.imgUrl):undefined}}">
+                    <img style="max-height: 100%;" class="img-responsive" ng-src="{{self.imgUrl?(self.baseUrl + self.imgUrl):undefined}}">
                 </div>
             </div>
         </div>

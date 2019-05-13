@@ -210,7 +210,7 @@ function imageSetManagerController($scope, $timeout, $element, wiToken, wiApi, w
 
     self.addImage = async function () {
         let well = self.treeConfig.find((aNode) => (self.selectedNode.idWell === aNode.idWell));
-        let topDepth = wApi.getWellTopDepth(well);
+        let topDepth = wiApi.getWellTopDepth(well);
         let bottomDepth = wiApi.getWellBottomDepth(well);
         self.selectedNode.images = self.selectedNode.images || [];
         let selectedIdx = self.selectedNode.images.findIndex(img => img._selected);
