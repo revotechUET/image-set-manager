@@ -24,7 +24,7 @@ function imageSetManagerController($scope, $timeout, $element, wiToken, wiApi, w
     self.unitOptions = [{id:1,name:'m'},{id:2,name:'ft'}];
     //self.unit = self.unitOptions[0];
     self.selectedNode = null;
-    const BASE_URL = "http://dev.i2g.cloud";
+    const BASE_URL = "http://api-1.i2g.cloud";
 
     this.$onInit = function () {
         self.hasPreview = true;
