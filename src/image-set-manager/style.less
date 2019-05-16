@@ -279,6 +279,14 @@ image-set-manager {
     span[ngclipboard] {
         cursor: pointer;
     }
+    editable .my-content{
+        float: none;
+        & > div{
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+    }
 }
 
 
