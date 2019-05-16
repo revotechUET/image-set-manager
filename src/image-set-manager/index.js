@@ -83,9 +83,10 @@ function imageSetManagerController($scope, $timeout, $element, wiToken, wiApi, w
         }
     }
 
-    this.clickFunction = function ($event, node) {
+    this.clickFunction = function ($event, node, selectedObjs) {
         updateNode(node);
         self.selectedNode = node;
+        self.selectedNodes = Object.values(selectedObjs).map(obj => obj.data);
     }
     self.createImageSet = function () {
         wiDialog.promptDialog({
@@ -111,13 +112,16 @@ function imageSetManagerController($scope, $timeout, $element, wiToken, wiApi, w
     self.deleteImageSet = function () {
         if (!self.selectedNode || !self.selectedNode.idImageSet) return;
         wiDialog.confirmDialog("Confirmation",
-            `Are you sure to delete image set "${self.selectedNode.name}"?`,
+            `Are you sure to delete image set "${self.selectedNodes.filter(n => n.idImageSet).map(n => n.name).toString().replace(/,/g, ', ')}"?`,
             async function (yesno) {
                 if (yesno) {
                     try {
-                        await wiApi.deleteImageSetPromise(self.selectedNode.idImageSet);
-                        let node = self.treeConfig.find((n) => (self.selectedNode.idWell === n.idWell));
-                        updateNode(node);
+                        for (let _node of self.selectedNodes) {
+                            if (_node.idImageSet) {
+                                await wiApi.deleteImageSetPromise(_node.idImageSet);
+                            }
+                        }
+                        getTree();
                     }
                     catch(err) {
                         console.error(err);
