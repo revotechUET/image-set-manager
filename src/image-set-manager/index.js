@@ -178,6 +178,7 @@ function imageSetManagerController($scope, $timeout, $element, wiToken, wiApi, w
         if ($event.key === 'Escape') {
             $timeout(() => {
                 self.imgUrl = null;
+                console.log("ok");
             });
         }
     }

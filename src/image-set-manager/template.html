@@ -76,7 +76,8 @@
                             </span>
                         </td>
                         <td>
-                            <editable params="image" item-value="image.name" set-value="self.updateImageName" enabled="true"></editable>
+                            <editable params="image" item-value="image.name" set-value="self.updateImageName"
+                                enabled="true"></editable>
                         </td>
                         <td>
                             <editable params="image" item-value="self.getImageTopDepth"
@@ -89,7 +90,7 @@
                         <td>
                             <span ng-click="self.imageSetup(image)" class="button-td">Upload</span>
                             <span ng-click="self.preview(image)" class="button-td" ng-disabled="!image.imageUrl"
-                            ng-class="{'disable': !image.imageUrl}" style="margin-left: 10px;">Preview</span>
+                                ng-class="{'disable': !image.imageUrl}" style="margin-left: 10px;">Preview</span>
                             <!-- <span style="margin-left: 10px;" ng-disabled="!image.imageUrl" class="button-td"
                             ng-class="{'disable': !image.imageUrl}" ngclipboard
                             data-clipboard-text="http://api-1.i2g.cloud{{image.imageUrl}}">
@@ -101,6 +102,7 @@
                     ng-keydown="self.keyDown($event);" tabindex="0" style="position:absolute;">
                     <img style="max-height: 100%;" class="img-responsive" ng-src="{{self.imgUrl?(self.baseUrl + self.imgUrl):undefined}}">
                 </div>
+
             </div>
         </div>
     </div>
