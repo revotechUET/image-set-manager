@@ -180,12 +180,17 @@ function imageSetManagerController($scope, $timeout, $element, wiToken, wiApi, w
 
     self.getFocus = function ($event) {
         $event.currentTarget.focus();
-    }
+    } 
 
     function getTree() {
         wiApi.getWellsPromise(self.idProject)
-            .then(wells => $timeout(() => self.treeConfig = wells))
+            .then(wells => $timeout(
+                () => self.treeConfig = wells.sort(
+                    (w1, w2) => (w1.name.localeCompare(w2.name))
+                )
+            ))
             .catch(err => console.error(err));
+            
     }
 
     self.getImages = getImages
