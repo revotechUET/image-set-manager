@@ -51,6 +51,7 @@ function imageSetManagerController($scope, $timeout, $element, wiToken, wiApi, w
             return node.name;
         }
     }
+    
     this.getIcon = function (node) {
         if (node.idImage) {
             return 'image-16x16';
@@ -60,6 +61,7 @@ function imageSetManagerController($scope, $timeout, $element, wiToken, wiApi, w
         else if (node.idWell)
             return "well-16x16";
     }
+
     this.getChildren = function (node) {
         if (node.idImageSet) {
             return null;
