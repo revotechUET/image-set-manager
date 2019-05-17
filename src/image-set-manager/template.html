@@ -45,12 +45,12 @@
                 <div>
                     <span class="label-button ti-trash" ng-class="{'active-button':true}" aria-hidden="true"
                         ng-click="self.deleteImage()"></span>
+                    <span class="label-button ti-reload" ng-class="{'active-button':true}" aria-hidden="true"
+                        ng-click="self.refreshImageSet()"></span>
                     <span class="label-button ti-plus" ng-class="{'active-button':self.selectedNode.idImageSet}"
                         aria-hidden="true" ng-click="self.addImage()"></span>
                     <span class="label-button ti-save" ng-class="{'active-button':true}" aria-hidden="true"
                         ng-click="self.applyImageActions()"></span>
-                    <!-- <span class="label-button ti-reload" ng-class="{'active-button':true}" aria-hidden="true"
-                    ng-click="self.refresh()"></span> -->
                 </div>
 
             </div>
@@ -100,7 +100,8 @@
                 </table>
                 <div ng-show="self.hasPreview && self.imgUrl" class="image-holder" ng-click="self.getFocus($event)"
                     ng-keydown="self.keyDown($event);" tabindex="0" style="position:absolute;">
-                    <img style="max-height: 100%;" class="img-responsive" ng-src="{{self.imgUrl?(self.baseUrl + self.imgUrl):undefined}}">
+                    <img style="max-height: 100%;" class="img-responsive"
+                        ng-src="{{self.imgUrl?(self.baseUrl + self.imgUrl):undefined}}">
                 </div>
 
             </div>

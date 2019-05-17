@@ -20,8 +20,11 @@ app.component(componentName, {
 
 function imageSetManagerController($scope, $timeout, $element, wiToken, wiApi, wiDialog) {
     let self = this;
+    const DEFAULT_HEIGHT = 1;
     self.treeConfig = [];
-    self.unitOptions = [{id:1,name:'m'},{id:2,name:'ft'}];
+    self.unitOptions = [{id:1,name:'m'},{id:2,name:'M'},{id:3,name:'meter'},{id:4,name:'meters'},
+    {id:5,name:'metres'},{id:6,name:'METERS'},{id:7,name:'METRES'},{id:8,name:'ft'},{id:9,name:'F'},
+    {id:10,name:'Ft'},{id:11,name:'feet'},{id:12,name:'FEET'}];
     //self.unit = self.unitOptions[0];
     self.selectedNode = null;
     const BASE_URL = "http://api-1.i2g.cloud";
@@ -65,10 +68,17 @@ function imageSetManagerController($scope, $timeout, $element, wiToken, wiApi, w
         }
     }
 
-    function updateNode(node) {
+    function updateNode(node, force) {
         if (node.idImageSet && node.idWell) {
             let well = self.treeConfig.find(w => w.idWell === node.idWell);
             self.unit = self.unitOptions.find(uOpt => (uOpt.name === getUnit(well).trim().toLowerCase()));
+            if(force){
+                wiApi.getImageSetPromise(node.idImageSet).then((imageSet) => {
+                    $timeout(() => {node.images = imageSet.images});
+                }).catch((err) => {
+                    console.error(err);
+                });
+            }
         } else {
             self.unit = self.unitOptions.find(uOpt => (uOpt.name === getUnit(node).trim().toLowerCase()));
             wiApi.getImageSetsPromise(node.idWell)
@@ -77,9 +87,6 @@ function imageSetManagerController($scope, $timeout, $element, wiToken, wiApi, w
                     $timeout(() => node.imageSets = imgs)
                 })
                 .catch(err => console.error(err));
-            /*getImageSet(node.idWell, function (err, imageSets) {
-                node.imageSets = imageSets;
-            });*/
         }
     }
 
@@ -104,8 +111,9 @@ function imageSetManagerController($scope, $timeout, $element, wiToken, wiApi, w
             updateNode(node);
         }
         catch(err) {
-            console.error(err);
-            self.createImageSet();
+            wiDialog.errorMessageDialog(err.message, function(){
+                self.createImageSet();
+            });
         }
     }
 
@@ -138,6 +146,10 @@ function imageSetManagerController($scope, $timeout, $element, wiToken, wiApi, w
         console.log("Export image set");
     }
     self.refresh = getTree;
+
+    self.refreshImageSet = function () {
+        updateNode(self.selectedNode, true);
+    }
 
     self.rowClick = function($event, image) {
         if (!$event.ctrlKey && !$event.metaKey && !$event.shiftKey) {
@@ -227,7 +239,7 @@ function imageSetManagerController($scope, $timeout, $element, wiToken, wiApi, w
         let imageObj = {
             name: 'newImage',
             topDepth: topDepth,
-            bottomDepth: Math.min(bottomDepth, topDepth + 100),
+            bottomDepth: Math.min(bottomDepth, topDepth + DEFAULT_HEIGHT),
             imageUrl: null,
             idImageSet: self.selectedNode.idImageSet
         }
@@ -237,7 +249,7 @@ function imageSetManagerController($scope, $timeout, $element, wiToken, wiApi, w
                 let previousImage = self.selectedNode.images[self.selectedNode.images.length-1];
                 oNum = previousImage.orderNum;
                 imageObj.topDepth = previousImage.bottomDepth;
-                imageObj.bottomDepth = Math.min(bottomDepth, imageObj.topDepth + 100);
+                imageObj.bottomDepth = Math.min(bottomDepth, imageObj.topDepth + DEFAULT_HEIGHT);
             }
         }
         else {
@@ -248,7 +260,7 @@ function imageSetManagerController($scope, $timeout, $element, wiToken, wiApi, w
             }
             let previousImage = self.selectedNode.images[selectedIdx];
             imageObj.topDepth = previousImage.bottomDepth;
-            imageObj.bottomDepth = Math.min(bottomDepth, imageObj.topDepth + 100);
+            imageObj.bottomDepth = Math.min(bottomDepth, imageObj.topDepth + DEFAULT_HEIGHT);
         }
         imageObj.orderNum = oNum;
         try {
@@ -311,6 +323,7 @@ function imageSetManagerController($scope, $timeout, $element, wiToken, wiApi, w
         }
     }
     self.getImageBottomDepth = function(image) {
+        
         return wiApi.bestNumberFormat(wiApi.convertUnit(image.bottomDepth, 'm', self.unit.name), 2);
     }
     self.updateImageBottomDepth = function (image, newVal) {
