@@ -22,9 +22,9 @@ function imageSetManagerController($scope, $timeout, $element, wiToken, wiApi, w
     let self = this;
     const DEFAULT_HEIGHT = 1;
     self.treeConfig = [];
-    self.unitOptions = [{id:1,name:'m'},{id:2,name:'M'},{id:3,name:'meter'},{id:4,name:'meters'},
-    {id:5,name:'metres'},{id:6,name:'METERS'},{id:7,name:'METRES'},{id:8,name:'ft'},{id:9,name:'F'},
-    {id:10,name:'Ft'},{id:11,name:'feet'},{id:12,name:'FEET'}];
+    self.unitOptions = [{id:1,name:'M'},{id:2,name:'m'},{id:3,name:'meter'},{id:4,name:'meters'},
+    {id:5,name:'metres'},{id:6,name:'METERS'},{id:7,name:'METRES'},{id:8,name:'F'},{id:9,name:'FEET'},
+    {id:10,name:'feet'},{id:11,name:'Ft'},{id:12,name:'ft'}];
     //self.unit = self.unitOptions[0];
     self.selectedNode = null;
     const BASE_URL = "http://api-1.i2g.cloud";
@@ -73,7 +73,7 @@ function imageSetManagerController($scope, $timeout, $element, wiToken, wiApi, w
     function updateNode(node, force) {
         if (node.idImageSet && node.idWell) {
             let well = self.treeConfig.find(w => w.idWell === node.idWell);
-            self.unit = self.unitOptions.find(uOpt => (uOpt.name === getUnit(well).trim().toLowerCase()));
+            self.unit = self.unitOptions.find(uOpt => (uOpt.name === getUnit(well).trim()));
             if(force){
                 wiApi.getImageSetPromise(node.idImageSet).then((imageSet) => {
                     $timeout(() => {node.images = imageSet.images});
@@ -82,7 +82,7 @@ function imageSetManagerController($scope, $timeout, $element, wiToken, wiApi, w
                 });
             }
         } else {
-            self.unit = self.unitOptions.find(uOpt => (uOpt.name === getUnit(node).trim().toLowerCase()));
+            self.unit = self.unitOptions.find(uOpt => (uOpt.name === getUnit(node).trim()));
             wiApi.getImageSetsPromise(node.idWell)
                 .then(imageSets => {
                     let imgs = imageSets.sort((img1, img2) => (img1.orderNum - img2.orderNum));
