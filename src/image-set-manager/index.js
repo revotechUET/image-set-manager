@@ -188,11 +188,17 @@ function imageSetManagerController($scope, $timeout, $element, wiToken, wiApi, w
             self.imgUrl = image.imageUrl;
         });
     }
+    self.closePreview = function () {
+        $timeout(() => {
+            self.imgUrl = null;
+            // console.log("ok");
+        });
+    }
     self.keyDown = function ($event) {
         if ($event.key === 'Escape') {
             $timeout(() => {
                 self.imgUrl = null;
-                console.log("ok");
+                // console.log("ok");
             });
         }
     }
@@ -313,13 +319,20 @@ function imageSetManagerController($scope, $timeout, $element, wiToken, wiApi, w
         if (newVal >= image.bottomDepth) {
             return console.log("Error again");
         }
-        let well = self.treeConfig.find((aNode) => (self.selectedNode.idWell === aNode.idWell));
-        let topDepth = wiApi.getWellTopDepth(well);
-        let bottomDepth = wiApi.getWellBottomDepth(well);
-        if ((newVal - topDepth) * (newVal - bottomDepth) < 0) {
+        let topDepth = image.topDepth;
+        // let well = self.treeConfig.find((aNode) => (self.selectedNode.idWell === aNode.idWell));
+        // let topDepth = wiApi.getWellTopDepth(well);
+        // let bottomDepth = wiApi.getWellBottomDepth(well);
+        if((newVal !== topDepth) || ((topDepth - newVal) > 0)){
             image.topDepth = newVal;
             image._updated = true;
         }
+        // if ((newVal - topDepth) * (newVal - bottomDepth) < 0) {
+        //     image.topDepth = newVal;
+        //     image._updated = true;
+        //     console.log((newVal - topDepth) * (newVal - bottomDepth));
+
+        // }
         else {
             console.log("Error");
         }
@@ -333,13 +346,18 @@ function imageSetManagerController($scope, $timeout, $element, wiToken, wiApi, w
         if (newVal <= image.topDepth) {
             return console.log("Error again");
         }
-        let well = self.treeConfig.find((aNode) => (self.selectedNode.idWell === aNode.idWell));
-        let topDepth = wiApi.getWellTopDepth(well);
-        let bottomDepth = wiApi.getWellBottomDepth(well);
-        if ((newVal - topDepth) * (newVal - bottomDepth) < 0) {
+        let bottomDepth = image.bottomDepth;
+        // let well = self.treeConfig.find((aNode) => (self.selectedNode.idWell === aNode.idWell));
+        // let topDepth = wiApi.getWellTopDepth(well);
+        // let bottomDepth = wiApi.getWellBottomDepth(well);
+        if((newVal !== bottomDepth) || ((bottomDepth - newVal) > 0)){
             image.bottomDepth = newVal;
             image._updated = true;
         }
+        // if ((newVal - topDepth) * (newVal - bottomDepth) < 0) {
+        //     image.bottomDepth = newVal;
+        //     image._updated = true;
+        // }
         else {
             console.log("Error");
         }
