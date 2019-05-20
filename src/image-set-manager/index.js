@@ -323,7 +323,9 @@ function imageSetManagerController($scope, $timeout, $element, wiToken, wiApi, w
         // let well = self.treeConfig.find((aNode) => (self.selectedNode.idWell === aNode.idWell));
         // let topDepth = wiApi.getWellTopDepth(well);
         // let bottomDepth = wiApi.getWellBottomDepth(well);
-        if((newVal !== topDepth) || ((topDepth - newVal) > 0)){
+        if (isNaN(newVal)){
+            image.topDepth = topDepth;
+        }else if((newVal !== topDepth) || ((topDepth - newVal) > 0)){
             image.topDepth = newVal;
             image._updated = true;
         }
@@ -350,7 +352,10 @@ function imageSetManagerController($scope, $timeout, $element, wiToken, wiApi, w
         // let well = self.treeConfig.find((aNode) => (self.selectedNode.idWell === aNode.idWell));
         // let topDepth = wiApi.getWellTopDepth(well);
         // let bottomDepth = wiApi.getWellBottomDepth(well);
-        if((newVal !== bottomDepth) || ((bottomDepth - newVal) > 0)){
+        if (isNaN(newVal)){
+            image.bottomDepth = bottomDepth;
+        }
+        else if((newVal !== bottomDepth) || ((bottomDepth - newVal) > 0)){
             image.bottomDepth = newVal;
             image._updated = true;
         }
