@@ -28,7 +28,7 @@ function imageSetManagerController($scope, $timeout, $element, wiToken, wiApi, w
     //self.unit = self.unitOptions[0];
     self.selectedNode = null;
     const BASE_URL = "http://api-1.i2g.cloud";
-
+    
     this.$onInit = function () {
         self.hasPreview = true;
         self.baseUrl = self.baseUrl || BASE_URL;
@@ -76,7 +76,10 @@ function imageSetManagerController($scope, $timeout, $element, wiToken, wiApi, w
             self.unit = self.unitOptions.find(uOpt => (uOpt.name === getUnit(well).trim()));
             if(force){
                 wiApi.getImageSetPromise(node.idImageSet).then((imageSet) => {
-                    $timeout(() => {node.images = imageSet.images});
+                    $timeout(() => {
+                        node.images = imageSet.images;
+                        console.log(imageSet)
+                    });
                 }).catch((err) => {
                     console.error(err);
                 });
@@ -165,19 +168,21 @@ function imageSetManagerController($scope, $timeout, $element, wiToken, wiApi, w
         }
         if ($event.shiftKey) {
             let selectedImages = self.selectedNode.images.filter(img => img._selected);
-            if (image.orderNum < selectedImages[0].orderNum) {
-                self.selectedNode.images.forEach(img => {
-                    if ((img.orderNum - image.orderNum)*(img.orderNum - selectedImages[0].orderNum) < 0) {
-                        img._selected = true;
-                    }
-                });
-            }
-            else if (image.orderNum > selectedImages[selectedImages.length-1].orderNum) {
-                self.selectedNode.images.forEach(img => {
-                    if ((img.orderNum - image.orderNum)*(img.orderNum - selectedImages[selectedImages.length-1].orderNum) < 0) {
-                        img._selected = true;
-                    }
-                });
+            if (selectedImages.length) {
+                if (image.orderNum < selectedImages[0].orderNum) {
+                    self.selectedNode.images.forEach(img => {
+                        if ((img.orderNum - image.orderNum)*(img.orderNum - selectedImages[0].orderNum) < 0) {
+                            img._selected = true;
+                        }
+                    });
+                }
+                else if (image.orderNum > selectedImages[selectedImages.length-1].orderNum) {
+                    self.selectedNode.images.forEach(img => {
+                        if ((img.orderNum - image.orderNum)*(img.orderNum - selectedImages[selectedImages.length-1].orderNum) < 0) {
+                            img._selected = true;
+                        }
+                    });
+                }
             }
         }
         image._selected = !image._selected;
@@ -239,39 +244,40 @@ function imageSetManagerController($scope, $timeout, $element, wiToken, wiApi, w
     }
 
     self.addImage = async function () {
-        let well = self.treeConfig.find((aNode) => (self.selectedNode.idWell === aNode.idWell));
-        let topDepth = wiApi.getWellTopDepth(well);
-        let bottomDepth = wiApi.getWellBottomDepth(well);
-        self.selectedNode.images = self.selectedNode.images || [];
-        let selectedIdx = self.selectedNode.images.findIndex(img => img._selected);
-        let imageObj = {
-            name: 'newImage',
-            topDepth: topDepth,
-            bottomDepth: Math.min(bottomDepth, topDepth + DEFAULT_HEIGHT),
-            imageUrl: null,
-            idImageSet: self.selectedNode.idImageSet
-        }
-        let oNum = 0;
-        if (selectedIdx < 0) {
-            if (self.selectedNode.images.length > 0) {
-                let previousImage = self.selectedNode.images[self.selectedNode.images.length-1];
-                oNum = previousImage.orderNum;
+        try {
+        
+            let well = self.treeConfig.find((aNode) => (self.selectedNode.idWell === aNode.idWell));
+            let topDepth = wiApi.getWellTopDepth(well);
+            let bottomDepth = wiApi.getWellBottomDepth(well);
+            self.selectedNode.images = self.selectedNode.images || [];
+            let selectedIdx = self.selectedNode.images.findIndex(img => img._selected);
+            let imageObj = {
+                name: 'newImage',
+                topDepth: topDepth,
+                bottomDepth: Math.min(bottomDepth, topDepth + DEFAULT_HEIGHT),
+                imageUrl: null,
+                idImageSet: self.selectedNode.idImageSet
+            }
+            let oNum = 0;
+            if (selectedIdx < 0) {
+                if (self.selectedNode.images.length > 0) {
+                    let previousImage = self.selectedNode.images[self.selectedNode.images.length-1];
+                    oNum = previousImage.orderNum;
+                    imageObj.topDepth = previousImage.bottomDepth;
+                    imageObj.bottomDepth = Math.min(bottomDepth, imageObj.topDepth + DEFAULT_HEIGHT);
+                }
+            }
+            else {
+                oNum = self.selectedNode.images[selectedIdx].orderNum + 1;
+                for( let j = selectedIdx + 1; j < self.selectedNode.images.length; j++ ) {
+                    self.selectedNode.images[j].orderNum = oNum + j - selectedIdx;
+                    self.selectedNode.images[j]._updated = true;
+                }
+                let previousImage = self.selectedNode.images[selectedIdx];
                 imageObj.topDepth = previousImage.bottomDepth;
                 imageObj.bottomDepth = Math.min(bottomDepth, imageObj.topDepth + DEFAULT_HEIGHT);
             }
-        }
-        else {
-            oNum = self.selectedNode.images[selectedIdx].orderNum + 1;
-            for( let j = selectedIdx + 1; j < self.selectedNode.images.length; j++ ) {
-                self.selectedNode.images[j].orderNum = oNum + j - selectedIdx;
-                self.selectedNode.images[j]._updated = true;
-            }
-            let previousImage = self.selectedNode.images[selectedIdx];
-            imageObj.topDepth = previousImage.bottomDepth;
-            imageObj.bottomDepth = Math.min(bottomDepth, imageObj.topDepth + DEFAULT_HEIGHT);
-        }
-        imageObj.orderNum = oNum;
-        try {
+            imageObj.orderNum = oNum;
             let image = await wiApi.createImagePromise(imageObj);
             image._created = true;
             if (selectedIdx < 0) {
@@ -286,6 +292,7 @@ function imageSetManagerController($scope, $timeout, $element, wiToken, wiApi, w
             }
         }
         catch(err) {
+            __toastr && __toastr.error(err.message);
             console.error(err);
         }
     }
@@ -374,19 +381,15 @@ function imageSetManagerController($scope, $timeout, $element, wiToken, wiApi, w
     async function updateListImage() {
         let images = self.getImages(self.selectedNode);
 
-        for (let idx = 0; idx < images.length; idx++) {
+        for (let idx = images.length - 1; idx >= 0; idx--) {
             let image = images[idx];
             if (image._deleted) {
-                if (image._created) {
-                    images.splice(idx, 1);
-                } else {
-                    try {
-                        if (image.imageUrl) await wiApi.deleteImageFilePromise(image.imageUrl);
-                        await wiApi.deleteImagePromise(image.idImage);
-                    }
-                    catch(err) {
-                        console.error(err);
-                    }
+                try {
+                    if (image.imageUrl) await wiApi.deleteImageFilePromise(image.imageUrl);
+                    await wiApi.deleteImagePromise(image.idImage);
+                }
+                catch(err) {
+                    console.error(err);
                 }
             } else if (image._created) {
                 if (image.imageUrl) {
