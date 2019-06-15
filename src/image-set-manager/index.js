@@ -323,9 +323,9 @@ function imageSetManagerController($scope, $timeout, $element, wiToken, wiApi, w
     }
     self.updateImageTopDepth = function (image, newVal) {
         newVal = wiApi.convertUnit(parseFloat(newVal),self.unit.name,'m');
-        if (newVal >= image.bottomDepth) {
-            return console.log("Error again");
-        }
+        // if (newVal >= image.bottomDepth) {
+        //     return console.log("Error again");
+        // }
         let topDepth = image.topDepth;
         // let well = self.treeConfig.find((aNode) => (self.selectedNode.idWell === aNode.idWell));
         // let topDepth = wiApi.getWellTopDepth(well);
@@ -352,9 +352,9 @@ function imageSetManagerController($scope, $timeout, $element, wiToken, wiApi, w
     }
     self.updateImageBottomDepth = function (image, newVal) {
         newVal = wiApi.convertUnit(parseFloat(newVal), self.unit.name, 'm');
-        if (newVal <= image.topDepth) {
-            return console.log("Error again");
-        }
+        // if (newVal <= image.topDepth) {
+        //     return console.log("Error again");
+        // }
         let bottomDepth = image.bottomDepth;
         // let well = self.treeConfig.find((aNode) => (self.selectedNode.idWell === aNode.idWell));
         // let topDepth = wiApi.getWellTopDepth(well);
