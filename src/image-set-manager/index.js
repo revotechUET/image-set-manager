@@ -13,7 +13,8 @@ app.component(componentName, {
     bindings: {
         token: "<",
         idProject: "<",
-        baseUrl: "<"
+        baseUrl: "<",
+        onUpdateListImageFinished: "<"
     },
     transclude: true
 });
