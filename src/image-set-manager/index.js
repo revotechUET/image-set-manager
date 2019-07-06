@@ -3,7 +3,7 @@ module.exports.name = componentName;
 require('./style.less');
 
 var app = angular.module(componentName, [
-    'sideBar', 'wiTreeView',
+    'sideBar', 'wiTreeView', 'wiTreeViewVirtual',
     'wiApi', 'editable', 'ngclipboard', 'wiDialog'
 ]);
 app.component(componentName, {

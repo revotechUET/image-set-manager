@@ -2,7 +2,7 @@
     <div class="main-body">
         <div class="main-body-left border-style">
             <side-bar my-default-width="270">
-                <wi-tree-view tree-root="self.treeConfig" get-label="self.getLabel" get-icon="self.getIcon"
+                <wi-tree-view-virtual tree-root="self.treeConfig" get-label="self.getLabel" get-icon="self.getIcon"
                     get-children="self.getChildren" run-match="self.runMatch" click-fn='self.clickFunction'>
                     <div class="label-list-view" style="border-bottom: 1px solid #f0f0f0;">
                         <span>WELL LIST</span>
@@ -17,7 +17,7 @@
                         <span class="label-button ti-reload" ng-class="{'active-button':true}" aria-hidden="true"
                             ng-click="self.refresh()"></span>
                     </div>
-                </wi-tree-view>
+                </wi-tree-view-virtual>
             </side-bar>
         </div>
         <div class="main-body-center border-style">
