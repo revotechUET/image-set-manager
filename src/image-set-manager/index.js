@@ -91,8 +91,9 @@ function imageSetManagerController($scope, $timeout, $element, wiToken, wiApi, w
                 .then(imageSets => {
                     let imgs = imageSets.sort((img1, img2) => (img1.orderNum - img2.orderNum));
                     $timeout(() => node.imageSets = imgs)
-                })
-                .catch(err => console.error(err));
+                }).catch(err => {
+                    console.error(err);
+                });
         }
     }
 
