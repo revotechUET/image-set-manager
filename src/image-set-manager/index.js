@@ -39,7 +39,8 @@ function imageSetManagerController($scope, $timeout, $element, wiToken, wiApi, w
         $element.find('.image-holder').draggable({
             start: function (event, ui) {
                 ui.helper[0].focus();
-            }
+            },
+            containment:'parent'
         });
     }
     this.runMatch = function (node, criteria) {
@@ -321,10 +322,12 @@ function imageSetManagerController($scope, $timeout, $element, wiToken, wiApi, w
         }
     }
     self.getImageTopDepth = function(image) {
-        return wiApi.bestNumberFormat(wiApi.convertUnit(image.topDepth, 'm', self.unit.name), 2);
+        if (_.isFinite(image.topDepth)) 
+            return wiApi.bestNumberFormat(wiApi.convertUnit(image.topDepth, 'm', (self.unit||{}).name || 'm'), 2);
+        return 1000;
     }
     self.updateImageTopDepth = function (image, newVal) {
-        newVal = wiApi.convertUnit(parseFloat(newVal),self.unit.name,'m');
+        newVal = wiApi.convertUnit(parseFloat(newVal),(self.unit||{}).name || 'm','m');
         // if (newVal >= image.bottomDepth) {
         //     return console.log("Error again");
         // }
@@ -349,11 +352,12 @@ function imageSetManagerController($scope, $timeout, $element, wiToken, wiApi, w
         }
     }
     self.getImageBottomDepth = function(image) {
-        
-        return wiApi.bestNumberFormat(wiApi.convertUnit(image.bottomDepth, 'm', self.unit.name), 2);
+        if (_.isFinite(image.bottomDepth)) 
+            return wiApi.bestNumberFormat(wiApi.convertUnit(image.bottomDepth, 'm', (self.unit||{}).name || 'm'), 2);
+        return 0;
     }
     self.updateImageBottomDepth = function (image, newVal) {
-        newVal = wiApi.convertUnit(parseFloat(newVal), self.unit.name, 'm');
+        newVal = wiApi.convertUnit(parseFloat(newVal), (self.unit||{}).name || 'm', 'm');
         // if (newVal <= image.topDepth) {
         //     return console.log("Error again");
         // }
@@ -446,7 +450,7 @@ function imageSetManagerController($scope, $timeout, $element, wiToken, wiApi, w
     self.getTopDepth = function() {
         try {
             let well = self.treeConfig.find((aNode) => (self.selectedNode.idWell === aNode.idWell));
-            return wiApi.bestNumberFormat(wiApi.getWellTopDepth(well, self.unit.name));
+            return wiApi.bestNumberFormat(wiApi.getWellTopDepth(well, (self.unit||{}).name || 'm'));
         }
         catch(err) {
             return "";
@@ -455,7 +459,7 @@ function imageSetManagerController($scope, $timeout, $element, wiToken, wiApi, w
     self.getBottomDepth = function() {
         try {
             let well = self.treeConfig.find((aNode) => (self.selectedNode.idWell === aNode.idWell));
-            return wiApi.bestNumberFormat(wiApi.getWellBottomDepth(well, self.unit.name));
+            return wiApi.bestNumberFormat(wiApi.getWellBottomDepth(well, (self.unit||{}).name || 'm'));
         }
         catch(err) {
             return "";

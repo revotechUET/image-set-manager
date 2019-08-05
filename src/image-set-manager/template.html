@@ -9,8 +9,8 @@
                             aria-hidden="true" ng-click="self.deleteImageSet()"></span>
                         <span class="label-button ti-plus" ng-class="{'active-button':self.selectedNode.idWell}"
                             aria-hidden="true" ng-click="self.createImageSet()"></span>
-                        <span class="label-button ti-export" ng-class="{'active-button':self.selectedNode.idImageSet}"
-                            aria-hidden="true" ng-click="self.exportImageSet()"></span>
+                        <!-- <span class="label-button ti-export" ng-class="{'active-button':self.selectedNode.idImageSet}"
+                            aria-hidden="true" ng-click="self.exportImageSet()"></span> -->
                         <span class="label-button ti-import" ng-class="{'active-button':true}" aria-hidden="true"
                             ng-click="self.importImages()"></span>
                         <span class="label-button ti-reload" ng-class="{'active-button':true}" aria-hidden="true"
@@ -102,28 +102,28 @@
                         </td>
                     </tr>
                 </table>
-                <div ng-show="self.hasPreview && self.imgUrl" class="image-holder" ng-click="self.getFocus($event)"
-                    ng-keydown="self.keyDown($event);" tabindex="0" style="position:absolute;">
-                    <div style="position: relative; display: contents;">
-                        <span style="
-                                top: -15px;
-                                right: -15px;
-                                width: 30px;
-                                height: 30px;
-                                color: #fff;
-                                justify-content: center;
-                                display: flex;
-                                align-items: center;
-                                background: #f37272;
-                                position: absolute;
-                                padding: 5px;
-                                border-radius: 50%;
-                                cursor: pointer;
-                                box-shadow: 0 3px 10px #00000026;
-                        " ng-click="self.closePreview()"><i class="fa fa-times" aria-hidden="true"></i></span>
-                        <img style="max-height: 100%;" class="img-responsive"
-                        ng-src="{{self.imgUrl?(self.baseUrl + self.imgUrl):undefined}}">
-                    </div>
+            </div>
+            <div ng-show="self.hasPreview && self.imgUrl" class="image-holder" ng-click="self.getFocus($event)"
+                ng-keydown="self.keyDown($event);" tabindex="0" style="position:absolute;">
+                <div style="position: relative; display: contents;">
+                    <span style="
+                            top: -15px;
+                            right: -15px;
+                            width: 30px;
+                            height: 30px;
+                            color: #fff;
+                            justify-content: center;
+                            display: flex;
+                            align-items: center;
+                            background: #f37272;
+                            position: absolute;
+                            padding: 5px;
+                            border-radius: 50%;
+                            cursor: pointer;
+                            box-shadow: 0 3px 10px #00000026;
+                    " ng-click="self.closePreview()"><i class="fa fa-times" aria-hidden="true"></i></span>
+                    <img style="max-height: 100%;" class="img-responsive"
+                    ng-src="{{self.imgUrl?(self.baseUrl + self.imgUrl):undefined}}">
                 </div>
             </div>
         </div>
