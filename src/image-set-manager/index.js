@@ -44,7 +44,10 @@ function imageSetManagerController($scope, $timeout, $element, wiToken, wiApi, w
         });
     }
     this.runMatch = function (node, criteria) {
-        return node.name.includes(criteria);
+        let keySearch = criteria.toLowerCase();
+        let searchArray = node.name.toLowerCase();
+        return searchArray.includes(keySearch);
+        // return node.name.includes(criteria);
     }
     this.getLabel = function (node) {
         if (node.idImageSet) {
