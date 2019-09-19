@@ -109,9 +109,30 @@ function imageSetManagerController($scope, $timeout, $element, wiToken, wiApi, w
     self.createImageSet = function () {
         wiDialog.promptDialog({
             title: "New Image Set",
-            inputName: "name",
+            inputName: "Name",
             input: 'ImgSet_'
         }, createImageSet);
+    }
+    self.renameImageSet = function () {
+        wiDialog.promptDialog({
+            title: "Rename Image Set",
+            inputName: "New name",
+            input: 'New name'
+        }, renameImageSet);
+    }
+    async function renameImageSet(imageSetName) {
+        if (!self.selectedNode) return;
+        try {
+            console.log(self.selectedNode);
+            await wiApi.renameImageSetPromise(imageSetName, self.selectedNode.idImageSet );
+            let node = self.treeConfig.find((n) => (self.selectedNode.idWell === n.idWell));
+            updateNode(node);
+        }
+        catch(err) {
+            wiDialog.errorMessageDialog(err.message, function(){
+                self.renameImageSet();
+            });
+        }
     }
 
     async function createImageSet(imageSetName) {
