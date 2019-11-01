@@ -19,7 +19,7 @@ app.component(componentName, {
     transclude: true
 });
 
-function imageSetManagerController($scope, $timeout, $element, wiToken, wiApi, wiDialog) {
+function imageSetManagerController($scope, $timeout, $element, $compile, wiToken, wiApi, wiDialog) {
     let self = this;
     const DEFAULT_HEIGHT = 1;
     self.treeConfig = [];
@@ -105,6 +105,7 @@ function imageSetManagerController($scope, $timeout, $element, wiToken, wiApi, w
         updateNode(node);
         self.selectedNode = node;
         self.selectedNodes = Object.values(selectedObjs).map(obj => obj.data);
+        self.vListWrapper = createVirtualTableWrapper();
     }
     self.createImageSet = function () {
         wiDialog.promptDialog({
@@ -346,7 +347,7 @@ function imageSetManagerController($scope, $timeout, $element, wiToken, wiApi, w
         }
     }
     self.getImageTopDepth = function(image) {
-        if (_.isFinite(image.topDepth)) 
+        if (image && _.isFinite(image.topDepth)) 
             return wiApi.bestNumberFormat(wiApi.convertUnit(image.topDepth, 'm', (self.unit||{}).name || 'm'), 2);
         return 1000;
     }
@@ -376,7 +377,7 @@ function imageSetManagerController($scope, $timeout, $element, wiToken, wiApi, w
         }
     }
     self.getImageBottomDepth = function(image) {
-        if (_.isFinite(image.bottomDepth)) 
+        if (image && _.isFinite(image.bottomDepth)) 
             return wiApi.bestNumberFormat(wiApi.convertUnit(image.bottomDepth, 'm', (self.unit||{}).name || 'm'), 2);
         return 0;
     }
@@ -488,5 +489,106 @@ function imageSetManagerController($scope, $timeout, $element, wiToken, wiApi, w
         catch(err) {
             return "";
         }
+    }
+
+    function debounce(func, wait, immediate) {
+        var timeout;
+        return function () {
+            var context = this, args = arguments;
+            var later = function () {
+                timeout = null;
+                if (!immediate) func.apply(context, args);
+            };
+            var callNow = immediate && !timeout;
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+            if (callNow) func.apply(context, args);
+        };
+    };
+    let _renderingFlag = false;
+    const _setRenderingFlag = debounce((value) => {
+        $timeout(() => {
+            _renderingFlag = value;
+        })
+    }, 500)
+    this.getRenderingFlag = () => _renderingFlag;
+
+    const htmlTemplate = `
+        <div ng-class="{'deleted': image._deleted, 'updated': image._updated, 'created': image._created}" 
+            ng-click="self.rowClick($event, image);">
+            <div class="image-select-btn cell" ng-style="{'width': self.widthArr[0]}">
+                <span ng-class="{'enabled': image._selected}" class="image-status fa fa-check">
+                </span>
+            </div>
+            <div class="image-editable cell" ng-style="{'width': self.widthArr[1]}">
+                <editable params="image" item-value="image.name" set-value="self.updateImageName"
+                    enabled="true"></editable>
+            </div>
+            <div class="image-editable cell" ng-style="{'width': self.widthArr[2]}">
+                <editable params="image" item-value="self.getImageTopDepth"
+                    set-value="self.updateImageTopDepth" enabled="true"></editable>
+            </div>
+            <div class="image-editable cell" ng-style="{'width': self.widthArr[3]}">
+                <editable params="image" item-value="self.getImageBottomDepth"
+                    set-value="self.updateImageBottomDepth" enabled="true"></editable>
+            </div>
+            <div class="image-btn-group cell" ng-style="{'width': self.widthArr[4]}">
+                <span ng-click="self.imageSetup(image)" class="button-td">Upload</span>
+                <span ng-click="self.preview(image)" class="button-td" ng-disabled="!image.imageUrl"
+                    ng-class="{'disable': !image.imageUrl}" style="margin-left: 10px;">Preview</span>
+            </div>
+            <div style="clear: both;"></div>
+        </div>
+    `;
+
+    const linkFn = $compile(htmlTemplate);
+
+    function createTableRowEle(index) {
+        if (!_renderingFlag)
+            _renderingFlag = true;
+        if (index < 0 || !self.selectedNode || !self.selectedNode.images || !self.selectedNode.images[index])
+            return document.createElement("div");
+        const image = self.selectedNode.images[index];
+
+        let newScope = $scope.$new();
+        newScope.image = image;
+        newScope.self = self;
+        const ele = document.createElement('div');
+        requestAnimationFrame(() => {
+            linkFn(newScope, node => {
+                ele.appendChild(node[0]);
+                _setRenderingFlag(false);
+            })
+        });
+        return ele;
+    };
+    function createVirtualTableWrapper() {
+        const container = $element.find('.image-table-container .content > div')[0];
+        $(container).empty();
+        const containerHeight = $(container).height();
+        const wrapper = new WiVirtualList({
+            height: +containerHeight,
+            itemHeight: 37,
+            htmlContainerElement: container,
+            totalRows: (self.selectedNode.images || []).length || 1,
+            generatorFn: row => {
+              return createTableRowEle(row);
+            }
+          });
+        wrapper.setContainerStyle({ 'width': '100%' , 'border': 'none'});
+        return wrapper;
+    }
+
+    this.widthArr = [];
+    this.onTableInit = function(tableWidthArr) {
+        $timeout(() => {
+            self.widthArr = tableWidthArr;
+        })
+    }
+    this.onHeaderWidthChanged = function(leftColIdx, leftColWidth, rightColIdx, rightColWidth) {
+        $timeout(() => {
+            self.widthArr[leftColIdx] = leftColWidth;
+            self.widthArr[rightColIdx] = rightColWidth;
+        });
     }
 }

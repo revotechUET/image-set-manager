@@ -241,6 +241,29 @@ image-set-manager {
             pointer-events:none;
             color: #d8d3d3;
         }
+    } 
+    .image-table-container .content > div {
+        height: 100%;
+        & > div {
+            overflow-y: overlay !important;
+            overflow-x: hidden !important;
+        }
+
+        .vrow div.cell {
+            vertical-align: middle;
+            border-right: 1px solid #f0f0f0;
+            float: left;
+            padding: 0 5px;
+        }
+
+        .vrow .image-select-btn {
+            text-align: center;
+        }
+         
+        .vrow > div {
+            line-height: 36px;
+            border-bottom: 1px solid #f0f0f0;
+        }
     }
 
     tr:hover {
@@ -257,11 +280,11 @@ image-set-manager {
     }
 
     .image-status {
-        color: #0077be;
+        color: #ddd;
         cursor: pointer;
 
-        &.disable {
-            color: #ddd;
+        &.enabled {
+            color: #0077be;
         }
     }
 
@@ -278,8 +301,6 @@ image-set-manager {
             color: #a2a2a2;
         }
     }
-
-
 
     .image-selection {
         border: none;
@@ -423,5 +444,4 @@ wi-tree-node {
             }
         }
     }
-
 }

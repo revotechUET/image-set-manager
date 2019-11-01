@@ -62,9 +62,38 @@
                 <span style="font-weight:bold;">Top:&nbsp;</span><span>{{self.getTopDepth();}}</span><span>&nbsp;&nbsp;-&nbsp;&nbsp;</span>
                 <span style="font-weight:bold;">Bottom:&nbsp;</span><span>{{self.getBottomDepth();}}</span>
             </div> -->
-            <div
-                style="flex:1; overflow:auto;display:flex;position:relative; background-color: #fff;border-top:1px solid #eee;">
-                <table style="width: 100%;">
+
+            <!--
+            <div class="image-table-row" style="width: calc(100% - 9px)" ng-if="self.selectedNode.idImageSet">
+                <span class="table-row-1"></span>
+                <span class="table-row-2">Name</span>
+                <span class="table-row-2">Top</span>
+                <span class="table-row-2">Bottom</span>
+                <span class="table-row-2">Image</span>
+            </div>
+            -->
+            <div style="flex: 1; position: relative;" >
+                <wi-table-resizeable
+                    class="image-table-container"
+                    headers="['', 'Name', 'Top', 'Bottom', 'Image']"
+                    on-table-init="self.onTableInit"
+                    on-header-width-changed="self.onHeaderWidthChanged"
+                    default-widths="[42, 300, 250, 250]">
+                    <!-- <div class="image-table-container"
+                        style="flex:1; overflow:hidden;display:flex;position:relative; background-color: #fff;border-top:1px solid #eee;">
+                    </div> -->
+                </wi-table-resizeable>
+                <div style="position: absolute; top: 0px; left: 0px; right: 0px; bottom: 0px; background: #f4f4f4;"
+                    ng-show="self.getRenderingFlag()">
+                    <span style="font-size: 3em; font-weight: 300; color: #333; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); display: inline-block;">
+                        LOADING...
+                    </span>
+                </div>
+            </div>
+            <!--
+            <div class="image-table-container"
+                style="flex:1; overflow:hidden;display:flex;position:relative; background-color: #fff;border-top:1px solid #eee;">
+                <table style="width: 100%;" class="image-table-container">
                     <tr ng-if="self.selectedNode.idImageSet">
                         <th style="width: 42px;"></th>
                         <th style="width: 40%;">Name</th>
@@ -72,6 +101,7 @@
                         <th style="width: 15%;">Bottom</th>
                         <th style="width: 40%;">Image</th>
                     </tr>
+
                     <tr ng-repeat="image in self.getImages(self.selectedNode)"
                         ng-class="{'deleted': image._deleted, 'updated': image._updated, 'created': image._created}"
                         ng-click="self.rowClick($event, image);">
@@ -95,14 +125,11 @@
                             <span ng-click="self.imageSetup(image)" class="button-td">Upload</span>
                             <span ng-click="self.preview(image)" class="button-td" ng-disabled="!image.imageUrl"
                                 ng-class="{'disable': !image.imageUrl}" style="margin-left: 10px;">Preview</span>
-                            <!-- <span style="margin-left: 10px;" ng-disabled="!image.imageUrl" class="button-td"
-                            ng-class="{'disable': !image.imageUrl}" ngclipboard
-                            data-clipboard-text="http://api-1.i2g.cloud{{image.imageUrl}}">
-                            Copy URL</span> -->
                         </td>
                     </tr>
                 </table>
             </div>
+            -->
             <div ng-show="self.hasPreview && self.imgUrl" class="image-holder" ng-click="self.getFocus($event)"
                 ng-keydown="self.keyDown($event);" tabindex="0" style="position:absolute;">
                 <div style="position: relative; display: contents;">
