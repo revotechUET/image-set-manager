@@ -544,10 +544,11 @@ function imageSetManagerController($scope, $timeout, $element, $compile, wiToken
     const linkFn = $compile(htmlTemplate);
 
     function createTableRowEle(index) {
-        if (!_renderingFlag)
-            _renderingFlag = true;
         if (index < 0 || !self.selectedNode || !self.selectedNode.images || !self.selectedNode.images[index])
             return document.createElement("div");
+
+        if (!_renderingFlag)
+            _renderingFlag = true;
         const image = self.selectedNode.images[index];
 
         let newScope = $scope.$new();
