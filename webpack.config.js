@@ -5,7 +5,8 @@ module.exports = {
 		main: "./index.js",
 	},
 	output: {
-		path: __dirname + '/dist',
+		path: __dirname + '/../wi-angular/watch/bower_components/image-set-manager/dist',
+		// path: __dirname + '/dist',
 		filename: 'image-set-manager.js'
 	},
 	module: {

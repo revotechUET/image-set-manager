@@ -75,37 +75,51 @@ function imageSetManagerController($scope, $timeout, $element, $compile, wiToken
         }
     }
 
-    function updateNode(node, force) {
+    async function updateNode(node, force) {
         if (node.idImageSet && node.idWell) {
             let well = self.treeConfig.find(w => w.idWell === node.idWell);
             self.unit = self.unitOptions.find(uOpt => (uOpt.name === getUnit(well).trim()));
             if(force){
-                wiApi.getImageSetPromise(node.idImageSet).then((imageSet) => {
-                    $timeout(() => {
-                        node.images = imageSet.images;
-                        console.log(imageSet)
+                await new Promise(res => {
+                    wiApi.getImageSetPromise(node.idImageSet).then((imageSet) => {
+                        $timeout(() => {
+                            node.images = imageSet.images;
+                            console.log(imageSet)
+                            res();
+                        });
+                    }).catch((err) => {
+                        console.error(err);
                     });
-                }).catch((err) => {
-                    console.error(err);
-                });
+                })
             }
         } else {
             self.unit = self.unitOptions.find(uOpt => (uOpt.name === getUnit(node).trim()));
-            wiApi.getImageSetsPromise(node.idWell)
-                .then(imageSets => {
-                    let imgs = imageSets.sort((img1, img2) => (img1.orderNum - img2.orderNum));
-                    $timeout(() => node.imageSets = imgs)
-                }).catch(err => {
-                    console.error(err);
-                });
+            await new Promise((res) => {
+                wiApi.getImageSetsPromise(node.idWell)
+                    .then(imageSets => {
+                        let imgs = imageSets.sort((img1, img2) => (img1.orderNum - img2.orderNum));
+                        $timeout(() => {
+                            node.imageSets = imgs
+                            res();
+                        })
+                    }).catch(err => {
+                        console.error(err);
+                    });
+            })
         }
+    }
+    
+    function updateVListTable() {
+        delete self.vListWrapper;
+        self.vListWrapper = createVirtualTableWrapper();
     }
 
     this.clickFunction = function ($event, node, selectedObjs) {
-        updateNode(node);
+        updateNode(node)
+            .then(updateVListTable);
         self.selectedNode = node;
         self.selectedNodes = Object.values(selectedObjs).map(obj => obj.data);
-        self.vListWrapper = createVirtualTableWrapper();
+        // self.vListWrapper = createVirtualTableWrapper();
     }
     self.createImageSet = function () {
         wiDialog.promptDialog({
@@ -181,7 +195,8 @@ function imageSetManagerController($scope, $timeout, $element, $compile, wiToken
     self.refresh = getTree;
 
     self.refreshImageSet = function () {
-        updateNode(self.selectedNode, true);
+        updateNode(self.selectedNode, true)
+            .then(updateVListTable);
     }
 
     self.rowClick = function($event, image) {
@@ -311,11 +326,13 @@ function imageSetManagerController($scope, $timeout, $element, $compile, wiToken
             if (selectedIdx < 0) {
                 $timeout(() => {
                     self.selectedNode.images.push(image);
+                    updateVListTable();
                 });
             }
             else {
                 $timeout(() => {
                     self.selectedNode.images.splice(selectedIdx, 0, image);
+                    updateVListTable();
                 });
             }
         }
@@ -330,6 +347,7 @@ function imageSetManagerController($scope, $timeout, $element, $compile, wiToken
         if (!images) return;
         images.filter((img) => (img._selected)).forEach(img => img._deleted = true);
         //image._deleted = true;
+        updateVListTable();
     }
 
     self.imageSetup = function (image) {
