@@ -233,7 +233,7 @@ function imageSetManagerController($scope, $timeout, $element, $compile, wiToken
     self.preview = function (image) {
         // console.log("row click");
         $timeout(() => {
-            self.imgUrl = image.imageUrl;
+            self.imgUrl = image.imageUrl + `?service=WI_BACKEND&token=${wiToken.getToken()}`;
         });
     }
     self.closePreview = function () {
