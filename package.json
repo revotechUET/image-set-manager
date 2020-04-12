@@ -1,6 +1,7 @@
 {
   "name": "base-map",
   "version": "0.0.1",
+  "main": "dist/image-set-manager.js",
   "devDependencies": {
     "css-loader": "^2.1.1",
     "html-loader": "^0.5.5",
