@@ -18,7 +18,7 @@ app.component(componentName, {
     },
     transclude: true
 });
-
+imageSetManagerController.$inject = ['$scope', '$timeout', '$element', '$compile', 'wiToken', 'wiApi', 'wiDialog'];
 function imageSetManagerController($scope, $timeout, $element, $compile, wiToken, wiApi, wiDialog) {
     let self = this;
     const DEFAULT_HEIGHT = 1;
