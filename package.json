@@ -1,5 +1,5 @@
 {
-  "name": "base-map",
+  "name": "image-set-manager",
   "version": "0.0.1",
   "main": "dist/image-set-manager.js",
   "devDependencies": {
