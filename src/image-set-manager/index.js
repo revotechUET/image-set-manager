@@ -1,6 +1,7 @@
+import WiVirtualList from 'wi-vlist';
 var componentName = 'imageSetManager';
-module.exports.name = componentName;
-require('./style.less');
+export const name = componentName;
+import './style.less';
 
 var app = angular.module(componentName, [
     'sideBar', 'wiTreeView', 'wiTreeViewVirtual',

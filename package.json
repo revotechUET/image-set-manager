@@ -1,12 +1,13 @@
 {
   "name": "image-set-manager",
   "version": "0.0.1",
-  "main": "dist/image-set-manager.js",
+  "main": "./src/index.js",
   "devDependencies": {
     "css-loader": "^2.1.1",
     "html-loader": "^0.5.5",
     "less": "^3.9.0",
     "less-loader": "^4.1.0",
-    "style-loader": "^0.23.1"
+    "style-loader": "^0.23.1",
+    "wi-vlist": "https://github.com/revotechUET/wi-vlist/archive/master.tar.gz"
   }
 }

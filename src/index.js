@@ -1,3 +1,1 @@
-module.exports = {
-    imageSetManager: require('./image-set-manager')
-}
+export * from './image-set-manager';
