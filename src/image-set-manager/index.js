@@ -232,9 +232,9 @@ function imageSetManagerController($scope, $timeout, $element, $compile, wiToken
         image._selected = !image._selected;
     }
     self.preview = function (image) {
-        // console.log("row click");
-        $timeout(() => {
-            self.imgUrl = image.imageUrl + `?service=WI_BACKEND&token=${wiToken.getToken()}`;
+        wiApi.getImage(`${image.imageUrl}?service=WI_BACKEND&token=${wiToken.getToken()}`).then(url => {
+            self.imgUrl = url;
+            $scope.$digest();
         });
     }
     self.closePreview = function () {
