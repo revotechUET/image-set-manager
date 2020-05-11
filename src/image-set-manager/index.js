@@ -117,7 +117,9 @@ function imageSetManagerController($scope, $timeout, $element, $compile, wiToken
 
     this.clickFunction = function ($event, node, selectedObjs) {
         updateNode(node)
-            .then(updateVListTable);
+            .then(() => {
+                node.idImageSet && updateListImage();
+            });
         self.selectedNode = node;
         self.selectedNodes = Object.values(selectedObjs).map(obj => obj.data);
         // self.vListWrapper = createVirtualTableWrapper();
@@ -430,9 +432,17 @@ function imageSetManagerController($scope, $timeout, $element, $compile, wiToken
 
     async function updateListImage() {
         let images = self.getImages(self.selectedNode);
-
         for (let idx = images.length - 1; idx >= 0; idx--) {
             let image = images[idx];
+            if (!image.imageUrl) {
+                try {
+                    await wiApi.deleteImagePromise(image.idImage);
+                    continue;
+                }
+                catch(err) {
+                    console.error(err);
+                }
+            }
             if (image._deleted) {
                 try {
                     if (image.imageUrl) await wiApi.deleteImageFilePromise(image.imageUrl);
@@ -450,26 +460,10 @@ function imageSetManagerController($scope, $timeout, $element, $compile, wiToken
                         console.error(err);
                     }
                 }
-                else {
-                    try {
-                        await wiApi.deleteImagePromise(image.idImage);
-                    }
-                    catch(err) {
-                        console.error(err);
-                    }
-                }
             } else if (image._updated) {
                 if (image.imageUrl) {
                     try {
                         await wiApi.updateImagePromise(image);
-                    }
-                    catch(err) {
-                        console.error(err);
-                    }
-                }
-                else {
-                    try {
-                        await wiApi.deleteImagePromise(image.idImage);
                     }
                     catch(err) {
                         console.error(err);
@@ -481,6 +475,7 @@ function imageSetManagerController($scope, $timeout, $element, $compile, wiToken
             let imageSet = await wiApi.getImageSetPromise(self.selectedNode.idImageSet);
             $timeout(() => {
                 self.selectedNode.images = imageSet.images;
+                updateVListTable();
             });
         }
         catch(err) {
