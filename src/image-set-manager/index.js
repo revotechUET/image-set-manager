@@ -199,7 +199,7 @@ function imageSetManagerController($scope, $timeout, $element, $compile, wiToken
 
     self.refreshImageSet = function () {
         updateNode(self.selectedNode, true)
-            .then(updateVListTable);
+            .then(updateListImage);
     }
 
     self.rowClick = function($event, image) {
