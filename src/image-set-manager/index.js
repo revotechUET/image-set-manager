@@ -1,3 +1,5 @@
+import Vue from 'vue';
+import { ngVue, WiTree } from '@revotechuet/misc-component-vue';
 import WiVirtualList from 'wi-vlist';
 var componentName = 'imageSetManager';
 export const name = componentName;
@@ -5,7 +7,7 @@ import './style.less';
 
 var app = angular.module(componentName, [
     'sideBar', 'wiTreeView', 'wiTreeViewVirtual',
-    'wiApi', 'editable', 'ngclipboard', 'wiDialog'
+    'wiApi', 'editable', 'ngclipboard', 'wiDialog', ngVue,
 ]);
 app.component(componentName, {
     template: require('./template.html'),
@@ -14,6 +16,8 @@ app.component(componentName, {
     bindings: {
         token: "<",
         idProject: "<",
+        idWell: '<',
+        idImageSet: '<',
         baseUrl: "<",
         onUpdateListImageFinished: "<"
     },
@@ -21,6 +25,7 @@ app.component(componentName, {
 });
 imageSetManagerController.$inject = ['$scope', '$timeout', '$element', '$compile', 'wiToken', 'wiApi', 'wiDialog'];
 function imageSetManagerController($scope, $timeout, $element, $compile, wiToken, wiApi, wiDialog) {
+    Object.assign($scope, { WiTree });
     let self = this;
     const DEFAULT_HEIGHT = 1;
     self.treeConfig = [];
@@ -36,6 +41,7 @@ function imageSetManagerController($scope, $timeout, $element, $compile, wiToken
         self.baseUrl = self.baseUrl || BASE_URL;
         if (self.token)
             wiToken.setToken(self.token);
+        self.idSelectedWell = self.idWell;
         getTree();
         $element.find('.image-holder').draggable({
             start: function (event, ui) {
@@ -83,11 +89,8 @@ function imageSetManagerController($scope, $timeout, $element, $compile, wiToken
             if(force){
                 await new Promise(res => {
                     wiApi.getImageSetPromise(node.idImageSet).then((imageSet) => {
-                        $timeout(() => {
-                            node.images = imageSet.images;
-                            console.log(imageSet)
-                            res();
-                        });
+                        Vue.set(node, 'images', imageSet.images);
+                        res();
                     }).catch((err) => {
                         console.error(err);
                     });
@@ -99,10 +102,9 @@ function imageSetManagerController($scope, $timeout, $element, $compile, wiToken
                 wiApi.getImageSetsPromise(node.idWell)
                     .then(imageSets => {
                         let imgs = imageSets.sort((img1, img2) => (img1.orderNum - img2.orderNum));
-                        $timeout(() => {
-                            node.imageSets = imgs
-                            res();
-                        })
+                        Vue.set(node, 'imageSets', imgs);
+                        node.$meta.render++;
+                        res();
                     }).catch(err => {
                         console.error(err);
                     });
@@ -115,13 +117,13 @@ function imageSetManagerController($scope, $timeout, $element, $compile, wiToken
         self.vListWrapper = createVirtualTableWrapper();
     }
 
-    this.clickFunction = function ($event, node, selectedObjs) {
+    this.clickFunction = function ($event, node, selectedNodes) {
         updateNode(node)
             .then(() => {
                 node.idImageSet && updateListImage();
             });
         self.selectedNode = node;
-        self.selectedNodes = Object.values(selectedObjs).map(obj => obj.data);
+        self.selectedNodes = selectedNodes;
         // self.vListWrapper = createVirtualTableWrapper();
     }
     self.createImageSet = function () {
@@ -260,13 +262,33 @@ function imageSetManagerController($scope, $timeout, $element, $compile, wiToken
 
     function getTree() {
         wiApi.getWellsPromise(self.idProject)
-            .then(wells => $timeout(
-                () => self.treeConfig = wells.sort(
+            .then(wells => $timeout(() => {
+                self.treeConfig = wells.sort(
                     (w1, w2) => (w1.name.localeCompare(w2.name))
                 )
-            ))
+                if (self.idSelectedWell) {
+                    const selectedWell = self.treeConfig.find(w => w.idWell === self.idSelectedWell);
+                    if (selectedWell) {
+                        updateNode(selectedWell).then(async () => {
+                            selectedWell.$meta.expanded = true;
+                            await self.tree.$nextTick();
+                            self.tree.updateTree();
+                            let selectedNode = selectedWell;
+                            if (self.idImageSet) {
+                                const imageSetNode = self.getChildren(selectedWell).find(z => z.idImageSet === self.idImageSet);
+                                if (imageSetNode) {
+                                    selectedNode = imageSetNode;
+                                    self.clickFunction({}, imageSetNode, [selectedNode]);
+                                }
+                            }
+                            self.initSelectedNodes = [selectedNode];
+                            self.selectedNode = selectedNode;
+                        })
+                    }
+                    self.idSelectedWell = null;
+                }
+            }))
             .catch(err => console.error(err));
-            
     }
 
     self.getImages = getImages

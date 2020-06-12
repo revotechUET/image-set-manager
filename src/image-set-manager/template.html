@@ -17,9 +17,26 @@
                             ng-click="self.refresh()"></span>
                     </div>
                     <div style="flex: 1; overflow: hidden;">
-                        <wi-tree-view-virtual tree-root="self.treeConfig" get-label="self.getLabel" get-icon="self.getIcon"
-                            get-children="self.getChildren" run-match="self.runMatch" click-fn='self.clickFunction'>
-                        </wi-tree-view-virtual>
+                        <input type="text" ng-model="filter" placeholder="Search"
+                            style="line-height: 1.5;
+                                padding: 10px 10px 10px 14px;
+                                border: none;
+                                border-bottom: 1px solid #f0f0f0;"
+                        >
+                        <vue-component root="WiTree"
+                            props="{
+                                treeRoot: self.treeConfig,
+                                filter,
+                                getChildren: self.getChildren,
+                                clickFn: self.clickFunction,
+                                getLabel: self.getLabel,
+                                getIcon: self.getIcon,
+                                runMatch: self.runMatch,
+                                initSelectedNodes: self.initSelectedNodes,
+                            }"
+                            container="self"
+                            ref="tree"
+                        ></vue-component>
                     </div>
                 </div>
             </side-bar>

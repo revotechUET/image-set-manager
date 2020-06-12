@@ -9,5 +9,9 @@
     "less-loader": "^4.1.0",
     "style-loader": "^0.23.1",
     "wi-vlist": "https://github.com/revotechUET/wi-vlist/archive/master.tar.gz"
+  },
+  "dependencies": {
+    "@revotechuet/misc-component-vue": "^1.1.4",
+    "vue": "^2.6.11"
   }
 }
