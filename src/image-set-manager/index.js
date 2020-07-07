@@ -381,7 +381,7 @@ function imageSetManagerController($scope, $timeout, $element, $compile, wiToken
                 image.imageUrl = imgUrl;
                 image._updated = true;
             }
-        }, idProject);
+        }, self.idProject);
     }
     self.updateImageName = function (image, newVal) {
         if (image.name != newVal) {
