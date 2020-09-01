@@ -120,7 +120,7 @@ function imageSetManagerController($scope, $timeout, $element, $compile, wiToken
     this.clickFunction = function ($event, node, selectedNodes) {
         updateNode(node)
             .then(() => {
-                node.idImageSet && updateListImage();
+                updateListImage();
             });
         self.selectedNode = node;
         self.selectedNodes = selectedNodes;
@@ -494,11 +494,11 @@ function imageSetManagerController($scope, $timeout, $element, $compile, wiToken
             }
         }
         try {
-            let imageSet = await wiApi.getImageSetPromise(self.selectedNode.idImageSet);
-            $timeout(() => {
+            if (self.selectedNode.idImageSet) {
+                const imageSet = await wiApi.getImageSetPromise(self.selectedNode.idImageSet);
                 self.selectedNode.images = imageSet.images;
-                updateVListTable();
-            });
+            }
+            updateVListTable();
         }
         catch(err) {
             console.error(err);
@@ -526,7 +526,7 @@ function imageSetManagerController($scope, $timeout, $element, $compile, wiToken
             return "";
         }
     }
-
+    /*
     function debounce(func, wait, immediate) {
         var timeout;
         return function () {
@@ -548,7 +548,7 @@ function imageSetManagerController($scope, $timeout, $element, $compile, wiToken
         })
     }, 500)
     this.getRenderingFlag = () => _renderingFlag;
-
+    */
     const htmlTemplate = `
         <div ng-class="{'deleted': image._deleted, 'updated': image._updated, 'created': image._created}" 
             ng-click="self.rowClick($event, image);">
@@ -583,20 +583,20 @@ function imageSetManagerController($scope, $timeout, $element, $compile, wiToken
         if (index < 0 || !self.selectedNode || !self.selectedNode.images || !self.selectedNode.images[index])
             return document.createElement("div");
 
-        if (!_renderingFlag)
-            _renderingFlag = true;
+        // if (!_renderingFlag)
+        //     _renderingFlag = true;
         const image = self.selectedNode.images[index];
 
         let newScope = $scope.$new();
         newScope.image = image;
         newScope.self = self;
         const ele = document.createElement('div');
-        requestAnimationFrame(() => {
+        // requestAnimationFrame(() => {
             linkFn(newScope, node => {
                 ele.appendChild(node[0]);
-                _setRenderingFlag(false);
+                // _setRenderingFlag(false);
             })
-        });
+        // });
         return ele;
     };
     function createVirtualTableWrapper() {
@@ -618,14 +618,14 @@ function imageSetManagerController($scope, $timeout, $element, $compile, wiToken
 
     this.widthArr = [];
     this.onTableInit = function(tableWidthArr) {
-        $timeout(() => {
+        // $timeout(() => {
             self.widthArr = tableWidthArr;
-        })
+        // })
     }
     this.onHeaderWidthChanged = function(leftColIdx, leftColWidth, rightColIdx, rightColWidth) {
-        $timeout(() => {
+        // $timeout(() => {
             self.widthArr[leftColIdx] = leftColWidth;
             self.widthArr[rightColIdx] = rightColWidth;
-        });
+        // });
     }
 }

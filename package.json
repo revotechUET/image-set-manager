@@ -11,7 +11,7 @@
     "wi-vlist": "https://github.com/revotechUET/wi-vlist/archive/master.tar.gz"
   },
   "dependencies": {
-    "@revotechuet/misc-component-vue": "^1.1.5",
+    "@revotechuet/misc-component-vue": "^1.1.27",
     "vue": "^2.6.11"
   }
 }
