@@ -498,6 +498,7 @@ function imageSetManagerController($scope, $timeout, $element, $compile, wiToken
                 const imageSet = await wiApi.getImageSetPromise(self.selectedNode.idImageSet);
                 self.selectedNode.images = imageSet.images;
             }
+            self.closePreview();
             updateVListTable();
         }
         catch(err) {
