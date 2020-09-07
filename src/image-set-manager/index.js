@@ -116,7 +116,8 @@ function imageSetManagerController($scope, $timeout, $element, $compile, wiToken
         delete self.vListWrapper;
         self.vListWrapper = createVirtualTableWrapper();
     }
-
+    this.topDepth = 0;
+    this.bottomDepth = 0;
     this.clickFunction = function ($event, node, selectedNodes) {
         updateNode(node)
             .then(() => {
@@ -124,6 +125,14 @@ function imageSetManagerController($scope, $timeout, $element, $compile, wiToken
             });
         self.selectedNode = node;
         self.selectedNodes = selectedNodes;
+        let well = self.treeConfig.find((aNode) => (self.selectedNode.idWell === aNode.idWell));
+        wiApi.getWellDepth(well.idWell)
+        .then(depth => {
+            $timeout(() => {
+                self.topDepth = depth.topDepth;
+                self.bottomDepth = depth.bottomDepth;
+            })
+        })
         // self.vListWrapper = createVirtualTableWrapper();
     }
     self.createImageSet = function () {
@@ -315,8 +324,9 @@ function imageSetManagerController($scope, $timeout, $element, $compile, wiToken
         try {
         
             let well = self.treeConfig.find((aNode) => (self.selectedNode.idWell === aNode.idWell));
-            let topDepth = wiApi.getWellTopDepth(well);
-            let bottomDepth = wiApi.getWellBottomDepth(well);
+            // let topDepth = wiApi.getWellTopDepth(well);
+            // let bottomDepth = wiApi.getWellBottomDepth(well);
+            let { topDepth, bottomDepth} = await wiApi.getWellDepth(well.idWell);
             self.selectedNode.images = self.selectedNode.images || [];
             let selectedIdx = self.selectedNode.images.findIndex(img => img._selected);
             let imageObj = {
@@ -510,8 +520,9 @@ function imageSetManagerController($scope, $timeout, $element, $compile, wiToken
     }
     self.getTopDepth = function() {
         try {
-            let well = self.treeConfig.find((aNode) => (self.selectedNode.idWell === aNode.idWell));
-            return wiApi.bestNumberFormat(wiApi.getWellTopDepth(well, (self.unit||{}).name || 'm'));
+            // let well = self.treeConfig.find((aNode) => (self.selectedNode.idWell === aNode.idWell));
+            // return wiApi.bestNumberFormat(wiApi.getWellTopDepth(well, (self.unit||{}).name || 'm'));
+            return wiApi.bestNumberFormat(wiApi.convertUnit(self.topDepth, 'm', (self.unit||{}).name || 'm'));
         }
         catch(err) {
             return "";
@@ -519,8 +530,9 @@ function imageSetManagerController($scope, $timeout, $element, $compile, wiToken
     }
     self.getBottomDepth = function() {
         try {
-            let well = self.treeConfig.find((aNode) => (self.selectedNode.idWell === aNode.idWell));
-            return wiApi.bestNumberFormat(wiApi.getWellBottomDepth(well, (self.unit||{}).name || 'm'));
+            // let well = self.treeConfig.find((aNode) => (self.selectedNode.idWell === aNode.idWell));
+            // return wiApi.bestNumberFormat(wiApi.getWellBottomDepth(well, (self.unit||{}).name || 'm'));
+            return wiApi.bestNumberFormat(wiApi.convertUnit(self.bottomDepth, 'm', (self.unit||{}).name || 'm'));
         }
         catch(err) {
             return "";
