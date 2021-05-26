@@ -35,7 +35,7 @@ function imageSetManagerController($scope, $timeout, $element, $compile, wiToken
     //self.unit = self.unitOptions[0];
     self.selectedNode = null;
     const BASE_URL = localStorage.getItem("BASE_URL");
-    
+
     this.$onInit = function () {
         self.hasPreview = true;
         self.baseUrl = self.baseUrl || BASE_URL;
@@ -372,7 +372,6 @@ function imageSetManagerController($scope, $timeout, $element, $compile, wiToken
             }
         }
         catch(err) {
-            __toastr && __toastr.error(err.message);
             console.error(err);
         }
     }

@@ -1,17 +1,27 @@
 {
-  "name": "image-set-manager",
-  "version": "0.0.1",
-  "main": "./src/index.js",
+  "name": "@revotechuet/image-set-manager",
+  "version": "0.1.1",
+  "repository": {},
+  "main": "./dist/index.js",
+  "files": [
+    "dist/*"
+  ],
   "devDependencies": {
-    "css-loader": "^2.1.1",
+    "css-loader": "^5.2.6",
     "html-loader": "^0.5.5",
     "less": "^3.9.0",
-    "less-loader": "^4.1.0",
+    "less-loader": "^9.0.0",
     "style-loader": "^0.23.1",
+    "webpack": "^5.37.1",
+    "webpack-cli": "^4.7.0",
     "wi-vlist": "https://github.com/revotechUET/wi-vlist/archive/master.tar.gz"
   },
   "dependencies": {
-    "@revotechuet/misc-component-vue": "^1.1.27",
+    "@revotechuet/misc-component-vue": "^1.2.2-61c4f39.0",
     "vue": "^2.6.11"
+  },
+  "scripts": {
+    "start": "webpack -w",
+    "build": "webpack --mode=production"
   }
 }
